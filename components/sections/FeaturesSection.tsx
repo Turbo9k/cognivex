@@ -1,36 +1,36 @@
 import React from 'react'
-import { CheckCircleIcon } from '@heroicons/react/24/solid'
+import { CheckCircle } from 'lucide-react'
 
 const features = [
   {
     title: 'Real-time Collaboration',
-    description: 'Work together with your team in real-time, with instant updates and changes.',
-    icon: CheckCircleIcon,
+    description: 'Work together with your team in real-time with seamless synchronization.',
+    icon: CheckCircle,
   },
   {
     title: 'Customizable Workspace',
-    description: 'Tailor your workspace to fit your team\'s unique needs and workflows.',
-    icon: CheckCircleIcon,
-  },
-  {
-    title: 'Powerful Integrations',
-    description: 'Connect with your favorite tools and services to streamline your workflow.',
-    icon: CheckCircleIcon,
+    description: 'Tailor your workspace to your team\'s needs with flexible layouts and tools.',
+    icon: CheckCircle,
   },
   {
     title: 'Advanced Security',
-    description: 'Enterprise-grade security features to keep your data safe and protected.',
-    icon: CheckCircleIcon,
+    description: 'Enterprise-grade security features to keep your data safe and compliant.',
+    icon: CheckCircle,
   },
   {
     title: 'Analytics & Insights',
     description: 'Get detailed insights into your team\'s productivity and project progress.',
-    icon: CheckCircleIcon,
+    icon: CheckCircle,
   },
   {
     title: 'Mobile Access',
-    description: 'Access your workspace from anywhere, on any device, at any time.',
-    icon: CheckCircleIcon,
+    description: 'Access your workspace from any device, anywhere in the world.',
+    icon: CheckCircle,
+  },
+  {
+    title: 'Integrations',
+    description: 'Connect with your favorite tools and services seamlessly.',
+    icon: CheckCircle,
   },
 ]
 
@@ -43,7 +43,7 @@ export default function FeaturesSection() {
             Everything you need to work together
           </h2>
           <p className="mt-4 text-xl text-gray-600">
-            Powerful features to help your team collaborate and get more done
+            Powerful features to help your team collaborate and achieve more.
           </p>
         </div>
 
@@ -55,10 +55,14 @@ export default function FeaturesSection() {
                 className="relative bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
               >
                 <div className="flex items-center">
-                  <feature.icon className="h-6 w-6 text-green-500" />
-                  <h3 className="ml-3 text-lg font-medium text-gray-900">{feature.title}</h3>
+                  <div className="flex-shrink-0">
+                    <feature.icon className="h-6 w-6 text-green-500" aria-hidden="true" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-medium text-gray-900">{feature.title}</h3>
+                    <p className="mt-2 text-base text-gray-500">{feature.description}</p>
+                  </div>
                 </div>
-                <p className="mt-4 text-base text-gray-500">{feature.description}</p>
               </div>
             ))}
           </div>
