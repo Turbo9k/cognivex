@@ -1,105 +1,57 @@
-import Image from 'next/image'
-import { Button } from "@/components/ui/button"
-import { CheckCircle, ArrowRight } from "lucide-react"
+import React from 'react'
+import { Building2, Users, BookOpen, Lightbulb } from 'lucide-react'
 
-interface UseCase {
-  title: string
-  description: string
-  image: string
-}
-
-interface CheckListItem {
-  text: string
-}
-
-const useCases: UseCase[] = [
+const useCases = [
   {
-    title: 'Project Management',
-    description: 'Organize tasks, track progress, and collaborate with your team in real-time.',
-    image: '/placeholder.svg?height=300&width=400',
+    title: 'Enterprise',
+    description: 'Transform how your company works with a single platform.',
+    icon: Building2,
   },
   {
-    title: 'Knowledge Base',
-    description: 'Create and maintain a centralized knowledge base for your organization.',
-    image: '/placeholder.svg?height=300&width=400',
+    title: 'Teams',
+    description: 'Keep your team aligned and focused on what matters.',
+    icon: Users,
   },
   {
-    title: 'Team Collaboration',
-    description: 'Work together seamlessly with integrated tools and real-time updates.',
-    image: '/placeholder.svg?height=300&width=400',
+    title: 'Education',
+    description: 'Help students and teachers work together more effectively.',
+    icon: BookOpen,
+  },
+  {
+    title: 'Personal',
+    description: 'Organize your life and work in one place.',
+    icon: Lightbulb,
   },
 ]
 
-const checkListItems: CheckListItem[] = [
-  { text: "Create docs, wikis, and project plans in one place" },
-  { text: "Track tasks and projects with custom databases" },
-  { text: "Collaborate in real-time with your entire team" }
-]
-
-export default function UseCasesSection(): JSX.Element {
+export default function UseCasesSection() {
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Every team, every use case
+    <div className="bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Use cases for every team
           </h2>
-          <p className="mt-4 text-xl text-gray-600">
-            Notion adapts to your needs. It's as minimal or as powerful as you need it to be.
+          <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            Notion adapts to your needs. Whether you're a team of 2 or 2,000, we've got you covered.
           </p>
         </div>
-
-        <div className="mt-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">For teams that want to move fast</h3>
-              <div className="space-y-4">
-                {checkListItems.map((item, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <p className="text-gray-600">{item.text}</p>
-                  </div>
-                ))}
-              </div>
-              <Button className="mt-8 bg-gray-900 hover:bg-gray-800 text-white">
-                Start for free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-            <div>
-              <Image
-                src="/placeholder.svg?height=400&width=500"
-                alt="Team collaboration interface"
-                width={500}
-                height={400}
-                className="rounded-lg border border-gray-200"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+          <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-4">
             {useCases.map((useCase) => (
-              <div
-                key={useCase.title}
-                className="relative bg-white rounded-lg shadow-lg overflow-hidden"
-              >
-                <div className="relative h-48 w-full">
-                  <Image
-                    src={useCase.image}
-                    alt={useCase.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900">{useCase.title}</h3>
-                  <p className="mt-4 text-base text-gray-500">{useCase.description}</p>
-                </div>
+              <div key={useCase.title} className="flex flex-col">
+                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-foreground">
+                  <useCase.icon className="h-5 w-5 flex-none text-primary" aria-hidden="true" />
+                  {useCase.title}
+                </dt>
+                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-muted-foreground">
+                  <p className="flex-auto">{useCase.description}</p>
+                </dd>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

@@ -1,0 +1,31 @@
+{
+  "quotes": [
+    {
+      "id": "1749341807998",
+      "name": "Def not Ian",
+      "email": "iansiats26@gmail.com",
+      "company": "N/A",
+      "message": "Hello there! test",
+      "status": "approved",
+      "createdAt": "2025-06-08T00:16:47.998Z"
+    },
+    {
+      "id": "1749342914851",
+      "name": "test",
+      "email": "test@test.com",
+      "company": "test",
+      "message": "test",
+      "status": "pending",
+      "createdAt": "2025-06-08T00:35:14.851Z"
+    },
+    {
+      "id": "1749342940618",
+      "name": "test",
+      "email": "test@test.com",
+      "company": "test",
+      "message": "test",
+      "status": "rejected",
+      "createdAt": "2025-06-08T00:35:40.618Z"
+    }
+  ]
+}

@@ -3,71 +3,56 @@ import { CheckCircle } from 'lucide-react'
 
 const features = [
   {
+    title: 'AI-Powered Writing',
+    description: 'Get help with writing, editing, and brainstorming with Notion AI.',
+    icon: CheckCircle,
+  },
+  {
+    title: 'Connected Workspace',
+    description: 'Keep all your work in one place with pages, databases, and more.',
+    icon: CheckCircle,
+  },
+  {
     title: 'Real-time Collaboration',
-    description: 'Work together with your team in real-time with seamless synchronization.',
+    description: 'Work together with your team in real-time, from anywhere.',
     icon: CheckCircle,
   },
   {
     title: 'Customizable Workspace',
-    description: 'Tailor your workspace to your team\'s needs with flexible layouts and tools.',
-    icon: CheckCircle,
-  },
-  {
-    title: 'Advanced Security',
-    description: 'Enterprise-grade security features to keep your data safe and compliant.',
-    icon: CheckCircle,
-  },
-  {
-    title: 'Analytics & Insights',
-    description: 'Get detailed insights into your team\'s productivity and project progress.',
-    icon: CheckCircle,
-  },
-  {
-    title: 'Mobile Access',
-    description: 'Access your workspace from any device, anywhere in the world.',
-    icon: CheckCircle,
-  },
-  {
-    title: 'Integrations',
-    description: 'Connect with your favorite tools and services seamlessly.',
+    description: "Tailor your workspace to your team's needs with flexible layouts and tools.",
     icon: CheckCircle,
   },
 ]
 
 export default function FeaturesSection() {
   return (
-    <section className="py-24 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Everything you need to work together
-          </h2>
-          <p className="mt-4 text-xl text-gray-600">
-            Powerful features to help your team collaborate and achieve more.
+    <div className="bg-background py-24 sm:py-32 transition-colors duration-200">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl lg:text-center">
+          <h2 className="text-base font-semibold leading-7 text-blue-600 dark:text-blue-400">Everything you need</h2>
+          <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            A better way to work together
+          </p>
+          <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            Notion brings all your work together in one place. From notes and docs to projects and wikis.
           </p>
         </div>
-
-        <div className="mt-20">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+          <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-4">
             {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="relative bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <feature.icon className="h-6 w-6 text-green-500" aria-hidden="true" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">{feature.title}</h3>
-                    <p className="mt-2 text-base text-gray-500">{feature.description}</p>
-                  </div>
-                </div>
+              <div key={feature.title} className="flex flex-col">
+                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-foreground">
+                  <feature.icon className="h-5 w-5 flex-none text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                  {feature.title}
+                </dt>
+                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-muted-foreground">
+                  <p className="flex-auto">{feature.description}</p>
+                </dd>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
