@@ -1,5 +1,9 @@
 # Notion Clone - Admin & Worker Management System
 
+**🚀 Live Admin & Worker Panels Available:**
+- **Admin Panel**: `/admin/login` - Username: `123`, Password: `123`  
+- **Worker Panel**: `/worker/login` - Username: `worker`, Password: `worker123`
+
 A modern, responsive Notion clone built with Next.js 14, TypeScript, and Tailwind CSS. This project replicates Notion's clean and intuitive interface while adding comprehensive admin and worker management systems.
 
 ## 🚀 Live Demo
@@ -276,4 +280,4 @@ For support, please open an issue on GitHub or contact the maintainers.
 
 ---
 
-**Made with ❤️ for the developer community** 
+**Made with ❤️ for the developer community**
