@@ -1,5 +1,5 @@
 import React from 'react'
-import connectDB from '@/lib/mongodb'
+import { connectDB } from '@/lib/mongodb'
 import Subscriber from '@/models/Subscriber'
 import { Subscriber as SubscriberType } from '@/types/subscriber'
 

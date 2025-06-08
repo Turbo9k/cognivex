@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectDB from '@/lib/mongodb'
+import { connectDB } from '@/lib/mongodb'
 import Subscriber from '@/models/Subscriber'
 
 export async function GET() {

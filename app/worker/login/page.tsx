@@ -27,8 +27,9 @@ export default function WorkerLogin() {
       const data = await response.json()
 
       if (response.ok) {
-        localStorage.setItem('workerToken', 'worker_session')
+        // JWT token is set in httpOnly cookie by the API
         router.push('/worker/dashboard')
+        router.refresh() // Refresh to update authentication state
       } else {
         setError(data.error || 'Login failed')
       }

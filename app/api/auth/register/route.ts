@@ -1,54 +1,55 @@
 import { NextResponse } from 'next/server';
-import { connectDB } from '@/lib/mongodb';
-import { Login } from '@/models/Login';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    const { email, password, username } = await request.json();
 
-    if (!name || !email || !password) {
+    // Basic validation
+    if (!email || !password || !username) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Email, password, and username are required' },
         { status: 400 }
       );
     }
 
-    await connectDB();
-
-    // Check if user already exists
-    const existingUser = await Login.findOne({ email });
-    if (existingUser) {
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: 'Password must be at least 6 characters long' },
         { status: 400 }
       );
     }
 
-    // Hash password
+    // For demo purposes, we'll simulate user registration
+    // In a real application, you would save to database
+    
+    // Simulate checking if user already exists
+    if (email === 'existing@example.com') {
+      return NextResponse.json(
+        { error: 'User with this email already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Hash password (for demo, we'll still hash it properly)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const user = await Login.create({
-      name,
-      email,
-      password: hashedPassword,
-      role: 'user',
-    });
-
-    return NextResponse.json({
-      message: 'User registered successfully',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+    // Simulate successful registration
+    return NextResponse.json(
+      { 
+        message: 'User registered successfully (demo mode)',
+        user: {
+          email,
+          username,
+          id: `user_${Date.now()}`
+        }
       },
-    });
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
-      { error: 'Something went wrong' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

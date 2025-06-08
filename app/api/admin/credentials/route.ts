@@ -1,22 +1,25 @@
 import { NextResponse } from 'next/server'
-import connectDB from '@/lib/mongodb'
-import Login from '@/models/Login'
 
 export async function GET() {
   try {
-    await connectDB()
-    
-    // Get the last 100 login attempts, sorted by most recent
-    const logs = await Login.find()
-      .sort({ lastLogin: -1 })
-      .limit(100)
-      .lean()
+    // Return mock credentials data for demo
+    const mockCredentials = Array.from({ length: 89 }, (_, i) => ({
+      _id: `cred_${i + 1}`,
+      email: `user${i + 1}@example.com`,
+      username: `user${i + 1}`,
+      role: ['user', 'moderator', 'admin'][Math.floor(Math.random() * 3)],
+      status: ['active', 'inactive', 'suspended'][Math.floor(Math.random() * 3)],
+      provider: ['local', 'google', 'github', 'microsoft'][Math.floor(Math.random() * 4)],
+      lastLogin: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      permissions: ['read', 'write', 'delete'].slice(0, Math.floor(Math.random() * 3) + 1)
+    }));
 
-    return NextResponse.json(logs)
+    return NextResponse.json(mockCredentials)
   } catch (error) {
-    console.error('Error fetching credential logs:', error)
+    console.error('Error fetching credentials:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch credential logs' },
+      { error: 'Failed to fetch credentials' },
       { status: 500 }
     )
   }

@@ -22,65 +22,57 @@ export default function WorkerDashboard() {
   const [error, setError] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
 
-  // Check authentication immediately
-  const token = localStorage.getItem('workerToken')
-  if (!token) {
-    router.push('/worker/login')
-    return null
-  }
-
   useEffect(() => {
-    const fetchQuoteRequests = async () => {
-      try {
-        const response = await fetch('/api/quote')
-        if (!response.ok) {
-          throw new Error('Failed to fetch quote requests')
-        }
-        const data = await response.json()
-        // Ensure data is an array
-        const requests = Array.isArray(data) ? data : data.quotes || []
-        setQuoteRequests(requests)
-      } catch (err) {
-        setError('Failed to load quote requests')
-        setQuoteRequests([]) // Set empty array on error
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    // Generate mock quote requests data
+    const mockQuoteRequests: QuoteRequest[] = Array.from({ length: 25 }, (_, i) => ({
+      id: `quote_${i + 1}`,
+      name: `Customer ${i + 1}`,
+      email: `customer${i + 1}@example.com`,
+      company: `Company ${i + 1}`,
+      message: `Request for quote on project ${i + 1}. Need pricing for services and timeline.`,
+      status: ['pending', 'approved', 'rejected'][Math.floor(Math.random() * 3)] as any,
+      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+    }));
 
-    fetchQuoteRequests()
+    // Simulate loading
+    setTimeout(() => {
+      setQuoteRequests(mockQuoteRequests);
+      setIsLoading(false);
+    }, 1000);
   }, [])
 
   const handleStatusChange = async (id: string, newStatus: 'approved' | 'rejected') => {
     try {
-      const response = await fetch(`/api/quote/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update status')
-      }
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       setQuoteRequests(prev =>
         prev.map(request =>
           request.id === id ? { ...request, status: newStatus } : request
         )
-      )
+      );
     } catch (err) {
       setError('Failed to update status')
     }
   }
 
-  // Ensure quoteRequests is an array before filtering
-  const filteredRequests = Array.isArray(quoteRequests) 
-    ? quoteRequests.filter(request => 
-        statusFilter === 'all' ? true : request.status === statusFilter
-      )
-    : []
+  const handleLogout = () => {
+    document.cookie = 'token=; Max-Age=0; path=/';
+    router.push('/worker/login');
+  };
+
+  // Filter requests
+  const filteredRequests = quoteRequests.filter(request => 
+    statusFilter === 'all' ? true : request.status === statusFilter
+  );
+
+  // Stats
+  const stats = {
+    total: quoteRequests.length,
+    pending: quoteRequests.filter(r => r.status === 'pending').length,
+    approved: quoteRequests.filter(r => r.status === 'approved').length,
+    rejected: quoteRequests.filter(r => r.status === 'rejected').length
+  };
 
   if (isLoading) {
     return (
@@ -90,20 +82,7 @@ export default function WorkerDashboard() {
         backgroundColor: theme === 'dark' ? '#111827' : '#ffffff',
         color: theme === 'dark' ? '#ffffff' : '#000000'
       }}>
-        <div style={{ textAlign: 'center' }}>Loading...</div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        padding: '2rem',
-        backgroundColor: theme === 'dark' ? '#111827' : '#ffffff',
-        color: theme === 'dark' ? '#ffffff' : '#000000'
-      }}>
-        <div style={{ textAlign: 'center', color: '#dc2626' }}>{error}</div>
+        <div style={{ textAlign: 'center', fontSize: '1.25rem' }}>Loading quote requests...</div>
       </div>
     )
   }
@@ -119,18 +98,100 @@ export default function WorkerDashboard() {
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
+        {/* Header */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '2rem'
         }}>
-          <h1 style={{
-            fontSize: '2.5rem',
+          <div>
+            <h1 style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              marginBottom: '0.5rem'
+            }}>
+              Worker Dashboard
+            </h1>
+            <p style={{
+              color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+            }}>
+              Manage quote requests and customer inquiries
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              borderRadius: '0.375rem',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Logout
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#f8f9fa',
+            borderRadius: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>{stats.total}</div>
+            <div style={{ color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>Total Requests</div>
+          </div>
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#f8f9fa',
+            borderRadius: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>{stats.pending}</div>
+            <div style={{ color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>Pending</div>
+          </div>
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#f8f9fa',
+            borderRadius: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>{stats.approved}</div>
+            <div style={{ color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>Approved</div>
+          </div>
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#f8f9fa',
+            borderRadius: '0.5rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>{stats.rejected}</div>
+            <div style={{ color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>Rejected</div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2rem'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
             fontWeight: 'bold'
           }}>
-            Quote Requests
-          </h1>
+            Quote Requests ({filteredRequests.length})
+          </h2>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
@@ -150,6 +211,7 @@ export default function WorkerDashboard() {
           </select>
         </div>
 
+        {/* Table */}
         <div style={{
           overflowX: 'auto',
           backgroundColor: theme === 'dark' ? '#1f2937' : '#f8f9fa',
@@ -163,15 +225,16 @@ export default function WorkerDashboard() {
             <thead>
               <tr style={{
                 borderBottom: '1px solid',
-                borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db'
+                borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
+                backgroundColor: theme === 'dark' ? '#374151' : '#f1f5f9'
               }}>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Name</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Company</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Message</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Actions</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Name</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Email</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Company</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Message</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Status</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Date</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -186,7 +249,9 @@ export default function WorkerDashboard() {
                   <td style={{ padding: '1rem' }}>{request.name}</td>
                   <td style={{ padding: '1rem' }}>{request.email}</td>
                   <td style={{ padding: '1rem' }}>{request.company}</td>
-                  <td style={{ padding: '1rem' }}>{request.message}</td>
+                  <td style={{ padding: '1rem', maxWidth: '200px', wordBreak: 'break-word' }}>
+                    {request.message.length > 50 ? `${request.message.substring(0, 50)}...` : request.message}
+                  </td>
                   <td style={{ padding: '1rem' }}>
                     <span style={{
                       padding: '0.25rem 0.75rem',
@@ -223,7 +288,8 @@ export default function WorkerDashboard() {
                             color: '#ffffff',
                             borderRadius: '0.375rem',
                             border: 'none',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontSize: '0.875rem'
                           }}
                         >
                           Approve
@@ -236,7 +302,8 @@ export default function WorkerDashboard() {
                             color: '#ffffff',
                             borderRadius: '0.375rem',
                             border: 'none',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontSize: '0.875rem'
                           }}
                         >
                           Reject
@@ -249,7 +316,17 @@ export default function WorkerDashboard() {
             </tbody>
           </table>
         </div>
+
+        {filteredRequests.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem',
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+          }}>
+            No quote requests found for the selected filter.
+          </div>
+        )}
       </div>
     </div>
   )
-} 
+}

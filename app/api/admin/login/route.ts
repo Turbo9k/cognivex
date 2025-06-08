@@ -1,58 +1,76 @@
 import { NextResponse } from 'next/server'
-import { sql } from '@vercel/postgres'
-import { cookies } from 'next/headers'
-import { sign } from 'jsonwebtoken'
+import type { NextRequest } from 'next/server'
+import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
-export async function POST(request: Request) {
+// Admin credentials (in production, this should be in a database with hashed passwords)
+const ADMIN_CREDENTIALS = {
+  username: process.env.ADMIN_USERNAME || '123',
+  password: process.env.ADMIN_PASSWORD || '123',
+}
+
+export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()
+    console.log('Admin login attempt:', { username })
 
-    // Query the database for the user
-    const { rows } = await sql`
-      SELECT * FROM admin_users 
-      WHERE username = ${username}
-    `
-
-    if (rows.length === 0) {
+    // Validate credentials
+    if (username !== ADMIN_CREDENTIALS.username || password !== ADMIN_CREDENTIALS.password) {
+      console.log('Invalid credentials provided')
       return NextResponse.json(
-        { message: 'Invalid credentials' },
+        { error: 'Invalid credentials' },
         { status: 401 }
       )
     }
 
-    const user = rows[0]
-
-    // In a real application, you should use bcrypt to compare hashed passwords
-    // This is a simplified example
-    if (password !== user.password_hash) {
-      return NextResponse.json(
-        { message: 'Invalid credentials' },
-        { status: 401 }
-      )
+    // Create JWT token for admin
+    const tokenPayload = { 
+      userId: 'admin', 
+      username: username,
+      role: 'admin',
+      email: 'admin@example.com'
     }
+    
+    console.log('Creating JWT token with payload:', tokenPayload)
+    
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' })
+    
+    console.log('JWT token created:', token.substring(0, 20) + '...')
 
-    // Create a JWT token
-    const token = sign(
-      { userId: user.id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: '1d' }
+    const response = NextResponse.json(
+      { 
+        message: 'Login successful',
+        user: {
+          id: 'admin',
+          username: username,
+          role: 'admin',
+          email: 'admin@example.com'
+        }
+      },
+      { status: 200 }
     )
 
-    // Set the token in a cookie
-    cookies().set('session_token', token, {
+    // Set the token cookie
+    const cookieOptions = {
+      name: 'token',
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24, // 1 day
-    })
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/',
+    }
+    
+    console.log('Setting cookie with options:', { ...cookieOptions, value: cookieOptions.value.substring(0, 20) + '...' })
+    
+    response.cookies.set(cookieOptions)
 
-    return NextResponse.json({ success: true })
+    return response
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('Admin login error:', error)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

@@ -8,20 +8,37 @@ export default function AdminLogin() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { theme } = useTheme()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
 
-    // Simple credential check
-    if (username === '123' && password === '123') {
-      // Set a simple session token
-      document.cookie = 'session_token=admin_session; path=/'
-      router.push('/admin')
-    } else {
-      setError('Invalid credentials')
+    try {
+      // Call the admin login API
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Redirect to admin dashboard
+        router.push('/admin/dashboard')
+      } else {
+        setError(data.error || 'Login failed')
+      }
+    } catch (error) {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -49,11 +66,12 @@ export default function AdminLogin() {
                 name="username"
                 type="text"
                 required
+                disabled={loading}
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
                   theme === 'dark' 
                     ? 'border-gray-600 bg-gray-700 text-white' 
                     : 'border-gray-300 bg-white text-gray-900'
-                } placeholder-gray-500 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                } placeholder-gray-500 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm disabled:opacity-50`}
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -68,11 +86,12 @@ export default function AdminLogin() {
                 name="password"
                 type="password"
                 required
+                disabled={loading}
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
                   theme === 'dark' 
                     ? 'border-gray-600 bg-gray-700 text-white' 
                     : 'border-gray-300 bg-white text-gray-900'
-                } placeholder-gray-500 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                } placeholder-gray-500 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm disabled:opacity-50`}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -83,9 +102,10 @@ export default function AdminLogin() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>

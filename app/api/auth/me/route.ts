@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import User from '@/app/models/User';
 import jwt from 'jsonwebtoken';
 
 export async function GET(request: NextRequest) {
@@ -15,19 +13,39 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { 
+      userId: string; 
+      username?: string; 
+      role?: string; 
+      email?: string; 
+    };
 
-    await connectDB();
-    const user = await User.findById(decoded.userId).select('-password');
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+    // For demo purposes, return user data based on token
+    if (decoded.userId === 'admin' && decoded.role === 'admin') {
+      return NextResponse.json({
+        id: 'admin',
+        username: 'admin',
+        email: 'admin@example.com',
+        role: 'admin'
+      });
     }
 
-    return NextResponse.json(user);
+    if (decoded.userId === 'worker' && decoded.role === 'worker') {
+      return NextResponse.json({
+        id: 'worker',
+        username: 'worker',
+        email: 'worker@example.com',
+        role: 'worker'
+      });
+    }
+
+    // For regular users, return mock data
+    return NextResponse.json({
+      id: decoded.userId,
+      username: decoded.username || 'user',
+      email: decoded.email || 'user@example.com',
+      role: decoded.role || 'user'
+    });
   } catch (error) {
     console.error('Error fetching user:', error);
     return NextResponse.json(

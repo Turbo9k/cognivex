@@ -10,15 +10,21 @@ export async function POST(request: Request) {
 
     // Simple credential check for worker
     if (username === 'worker' && password === 'worker123') {
-      // Create a JWT token
+      // Create a JWT token with consistent structure
       const token = jwt.sign(
-        { username, role: 'worker' },
+        { 
+          userId: 'worker',
+          username: 'worker',
+          role: 'worker',
+          isWorker: true,
+          isAuthenticated: true
+        },
         JWT_SECRET,
         { expiresIn: '1d' }
       )
 
-      // Set the token in a cookie
-      cookies().set('worker_token', token, {
+      // Set the token in the same cookie as admin for consistency
+      cookies().set('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -27,12 +33,16 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ 
         success: true,
-        message: 'Login successful'
+        message: 'Worker login successful',
+        user: {
+          username: 'worker',
+          role: 'worker'
+        }
       })
     }
 
     return NextResponse.json(
-      { error: 'Invalid credentials' },
+      { error: 'Invalid worker credentials' },
       { status: 401 }
     )
   } catch (error) {
