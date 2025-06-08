@@ -22,6 +22,12 @@ export function middleware(request: NextRequest) {
   const publicPaths = [
     '/',
     '/login',
+    '/register',
+    '/product',
+    '/solutions',
+    '/resources',
+    '/pricing',
+    '/contact',
     '/admin/login', 
     '/worker/login',
     '/api/auth',
