@@ -1,3 +1,9 @@
+has both admin and worker panels
+/Admin/login  User/Pass 123 123
+/worker/login User/Pass worker worker123
+
+
+
 # Notion Clone
 
 A modern, responsive Notion clone built with Next.js 13, TypeScript, and Tailwind CSS. This project replicates Notion's clean and intuitive interface while adding some unique features.
