@@ -7,8 +7,8 @@ import { ThemeProvider } from '@/components/theme-provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Notion - Write, plan, share. With AI at your side.',
-  description: 'Notion is the connected workspace where better, faster work happens. Now with Q&A and writing assistance from Notion AI.',
+  title: 'Cognivex - Intelligent Workspace Management',
+  description: 'Cognivex is the connected workspace where better, faster work happens. Streamlined admin and worker management with intelligent automation.',
 }
 
 export default function RootLayout({

@@ -15,7 +15,7 @@ export default function ResourcesPage() {
               <span className="block text-primary">you succeed</span>
             </h1>
             <p className="mt-3 max-w-md mx-auto text-base text-muted-foreground sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              Guides, templates, and community content to help you get the most out of Notion.
+              Guides, templates, and community content to help you get the most out of Cognivex.
             </p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function ResourcesPage() {
 const resources = [
   {
     title: 'Guides & Tutorials',
-    description: 'Step-by-step guides to help you master Notion.',
+    description: 'Step-by-step guides to help you master Cognivex.',
     icon: Book,
     linkIcon: FileText,
     href: '/resources/guides',
@@ -77,7 +77,7 @@ const resources = [
   },
   {
     title: 'Community',
-    description: 'Connect with other Notion users and share ideas.',
+    description: 'Connect with other Cognivex users and share ideas.',
     icon: Users,
     linkIcon: MessageSquare,
     href: '/resources/community',

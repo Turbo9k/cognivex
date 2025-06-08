@@ -36,7 +36,7 @@ export default function CommunityPage() {
           marginLeft: 'auto',
           marginRight: 'auto'
         }}>
-          Connect with other Notion users and share ideas.
+          Connect with other Cognivex users and share ideas.
         </p>
 
         <div style={{

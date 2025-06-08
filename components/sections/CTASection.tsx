@@ -12,10 +12,10 @@ export default function CTASection({ variant }: CTASectionProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Get started with Notion today
+              Get started with Cognivex today
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-              Join millions of teams who use Notion to work better together.
+              Join millions of teams who use Cognivex to work better together.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link

@@ -15,7 +15,7 @@ export default function SolutionsPage() {
               <span className="block text-primary">every team</span>
             </h1>
             <p className="mt-3 max-w-md mx-auto text-base text-muted-foreground sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              Discover how teams of all sizes use Notion to work better together.
+              Discover how teams of all sizes use Cognivex to work better together.
             </p>
           </div>
         </div>

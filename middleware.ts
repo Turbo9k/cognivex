@@ -26,7 +26,9 @@ export function middleware(request: NextRequest) {
     '/worker/login',
     '/api/auth',
     '/api/admin/login',
-    '/api/worker/login',
+    '/api/auth/worker-login',
+    '/api/auth/logout',
+    '/api/auth/check-worker',
     '/_next',
     '/favicon.ico'
   ];
@@ -36,6 +38,15 @@ export function middleware(request: NextRequest) {
   
   // Get the token from cookies
   const token = request.cookies.get('token')?.value;
+  
+  // Debug worker paths
+  if (pathname.startsWith('/worker')) {
+    console.log(`Worker path access: ${pathname}, Token exists: ${!!token}`);
+    if (token) {
+      const payload = decodeJWTPayload(token);
+      console.log('Token payload:', payload);
+    }
+  }
   
   // If no token and trying to access protected route, redirect to login
   if (!token && !isPublicPath) {
@@ -54,37 +65,27 @@ export function middleware(request: NextRequest) {
     }
 
     // Route analysis
-    const isAdminPath = pathname.startsWith('/admin');
-    const isWorkerPath = pathname.startsWith('/worker');
+    const isAdminPath = pathname.startsWith('/admin') && pathname !== '/admin/login';
+    const isWorkerPath = pathname.startsWith('/worker') && pathname !== '/worker/login';
     const isDashboardPath = pathname === '/dashboard';
     const isAdmin = payload.role === 'admin';
     const isWorker = payload.role === 'worker';
     const isAuthenticated = payload.isAuthenticated;
 
-    // Admin access control
+    // Admin access control (but allow access to admin login page)
     if (isAdminPath && !isAdmin) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Worker access control  
+    // Worker access control (but allow access to worker login page)
     if (isWorkerPath && !isWorker) {
+      console.log(`Worker access denied. isWorker: ${isWorker}, role: ${payload.role}`);
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
     // Dashboard access control
     if (isDashboardPath && !isAuthenticated) {
       return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    // Redirect authenticated users from login pages
-    if (isAuthenticated && (pathname === '/login' || pathname === '/admin/login' || pathname === '/worker/login')) {
-      if (isAdmin) {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-      } else if (isWorker) {
-        return NextResponse.redirect(new URL('/worker/dashboard', request.url));
-      } else {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
     }
   }
 
@@ -95,11 +96,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 } 

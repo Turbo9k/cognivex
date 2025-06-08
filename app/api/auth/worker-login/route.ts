@@ -6,30 +6,64 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json()
+    // Get the raw body text first
+    const body = await request.text();
+    console.log('Raw request body:', body);
+    
+    // Parse JSON manually with better error handling
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(body);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Body that failed to parse:', body);
+      return NextResponse.json(
+        { error: 'Invalid JSON format' },
+        { status: 400 }
+      );
+    }
+
+    const { username, password } = parsedBody;
+    console.log('Parsed credentials:', { username, password: password ? '***' : undefined });
+
+    // Validate required fields
+    if (!username || !password) {
+      return NextResponse.json(
+        { error: 'Username and password are required' },
+        { status: 400 }
+      );
+    }
 
     // Simple credential check for worker
-    if (username === 'worker' && password === 'worker123') {
+    if (username === 'worker' && password === 'worker') {
+      console.log('Worker credentials validated successfully');
+      
+      // Clear any existing token first
+      cookies().delete('token');
+
       // Create a JWT token with consistent structure
-      const token = jwt.sign(
-        { 
-          userId: 'worker',
-          username: 'worker',
-          role: 'worker',
-          isWorker: true,
-          isAuthenticated: true
-        },
-        JWT_SECRET,
-        { expiresIn: '1d' }
-      )
+      const payload = {
+        userId: 'worker',
+        username: 'worker',
+        role: 'worker',
+        isWorker: true,
+        isAuthenticated: true
+      }
+
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' })
+      console.log('Worker JWT token created');
 
       // Set the token in the same cookie as admin for consistency
-      cookies().set('token', token, {
+      const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax' as const,
         maxAge: 60 * 60 * 24, // 1 day
-      })
+        path: '/'
+      }
+
+      cookies().set('token', token, cookieOptions)
+      console.log('Worker token cookie set');
 
       return NextResponse.json({ 
         success: true,
@@ -41,6 +75,7 @@ export async function POST(request: Request) {
       })
     }
 
+    console.log('Invalid worker credentials provided');
     return NextResponse.json(
       { error: 'Invalid worker credentials' },
       { status: 401 }

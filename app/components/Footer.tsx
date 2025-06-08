@@ -163,7 +163,7 @@ export default function Footer() {
           textAlign: 'center',
           color: theme === 'dark' ? '#9ca3af' : '#6b7280'
         }}>
-          <p>© 2024 Notion. All rights reserved.</p>
+          <p>© 2024 Cognivex. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -5,7 +5,7 @@ import Footer from '@/components/layout/Footer'
 const features = [
   {
     title: 'AI-Powered Writing',
-    description: 'Get help with writing, editing, and brainstorming with Notion AI.',
+    description: 'Get help with writing, editing, and brainstorming with intelligent automation.',
     icon: CheckCircle
   },
   {
@@ -35,7 +35,7 @@ export default function ProductPage() {
             A better way to work together
           </p>
           <p className="mt-4 text-lg leading-8 text-muted-foreground">
-            Notion brings all your work together in one place. From notes and docs to projects and wikis.
+            Cognivex brings all your work together in one place. From notes and docs to projects and wikis.
           </p>
         </div>
         <div className="mx-auto mt-12 max-w-5xl">

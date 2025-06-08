@@ -14,7 +14,7 @@ export default function Navbar() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="text-2xl font-bold text-gray-900">
-                Notion
+                Cognivex
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -49,7 +49,7 @@ export default function Navbar() {
               href="/pricing"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              Get Notion Free
+              Get Started
             </Link>
           </div>
           <div className="-mr-2 flex items-center sm:hidden">
@@ -101,7 +101,7 @@ export default function Navbar() {
                 href="/pricing"
                 className="block w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
-                Get Notion Free
+                Get Started
               </Link>
             </div>
           </div>

@@ -36,7 +36,7 @@ export default function GuidesPage() {
           marginLeft: 'auto',
           marginRight: 'auto'
         }}>
-          Step-by-step guides to help you master Notion.
+          Step-by-step guides to help you master Cognivex.
         </p>
 
         <div style={{

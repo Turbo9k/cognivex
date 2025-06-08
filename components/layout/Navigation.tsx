@@ -10,7 +10,7 @@ export default function Navigation(): JSX.Element {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-xl font-semibold text-gray-900 dark:text-white">
-              Notion
+              Cognivex
             </Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/product" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white text-sm">
@@ -35,9 +35,9 @@ export default function Navigation(): JSX.Element {
               </Button>
             </Link>
             <Link href="/pricing">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                Get Notion free
-              </Button>
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+          Get Started
+        </Button>
             </Link>
           </div>
         </div>

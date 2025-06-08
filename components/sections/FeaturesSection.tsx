@@ -4,7 +4,7 @@ import { CheckCircle } from 'lucide-react'
 const features = [
   {
     title: 'AI-Powered Writing',
-    description: 'Get help with writing, editing, and brainstorming with Notion AI.',
+    description: 'Get help with writing, editing, and brainstorming with intelligent automation.',
     icon: CheckCircle,
   },
   {
@@ -34,7 +34,7 @@ export default function FeaturesSection() {
             A better way to work together
           </p>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Notion brings all your work together in one place. From notes and docs to projects and wikis.
+            Cognivex brings all your work together in one place. From notes and docs to projects and wikis.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">

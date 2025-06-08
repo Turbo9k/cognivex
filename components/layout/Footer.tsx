@@ -46,7 +46,7 @@ export default function Footer(): JSX.Element {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <Link href="/" className="text-xl font-semibold text-foreground mb-4 block">
-              Notion
+              Cognivex
             </Link>
             <p className="text-muted-foreground text-sm">A new tool that blends your everyday work apps into one.</p>
           </div>
@@ -66,7 +66,7 @@ export default function Footer(): JSX.Element {
           ))}
         </div>
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">© 2024 Notion Labs, Inc.</p>
+          <p className="text-sm text-muted-foreground">© 2024 Cognivex, Inc.</p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <Globe className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">English</span>

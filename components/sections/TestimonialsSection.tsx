@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 const testimonials = [
   {
-    content: "Notion has completely transformed how our team works together. It's the only tool we need.",
+    content: "Cognivex has completely transformed how our team works together. It's the only tool we need.",
     author: {
       name: 'Sarah Chen',
       role: 'Product Manager',
@@ -12,7 +12,7 @@ const testimonials = [
     },
   },
   {
-    content: "The flexibility of Notion allows us to build exactly what we need, when we need it.",
+    content: "The flexibility of Cognivex allows us to build exactly what we need, when we need it.",
     author: {
       name: 'Michael Rodriguez',
       role: 'Engineering Lead',
@@ -21,7 +21,7 @@ const testimonials = [
     },
   },
   {
-    content: "We've tried every tool out there, but Notion is the only one that truly adapts to our workflow.",
+    content: "We've tried every tool out there, but Cognivex is the only one that truly adapts to our workflow.",
     author: {
       name: 'Emily Johnson',
       role: 'Marketing Director',
@@ -40,7 +40,7 @@ export default function TestimonialsSection() {
             Loved by teams worldwide
           </h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            See how teams of all sizes use Notion to work better together.
+            See how teams of all sizes use Cognivex to work better together.
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">

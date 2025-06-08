@@ -33,7 +33,7 @@ export default function UseCasesSection() {
             Use cases for every team
           </h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Notion adapts to your needs. Whether you're a team of 2 or 2,000, we've got you covered.
+            Cognivex adapts to your needs. Whether you're a team of 2 or 2,000, we've got you covered.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">

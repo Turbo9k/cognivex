@@ -6,12 +6,10 @@ import UseCasesSection from '@/components/sections/UseCasesSection'
 import TestimonialsSection from '@/components/sections/TestimonialsSection'
 import CTASection from '@/components/sections/CTASection'
 import SocialProofSection from '@/components/sections/SocialProofSection'
-import CompanyLogoSection from '@/components/sections/CompanyLogoSection'
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
-      <CompanyLogoSection />
       <HeroSection />
       <FeaturesSection />
       <UseCasesSection />

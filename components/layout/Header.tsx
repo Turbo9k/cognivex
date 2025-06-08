@@ -37,7 +37,7 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">Notion</span>
+            <span className="text-xl font-bold">Cognivex</span>
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link href="/product" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">

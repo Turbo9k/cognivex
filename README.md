@@ -1,10 +1,10 @@
-# Notion Clone - Admin & Worker Management System
+# Cognivex - Admin & Worker Management System
 
 **🚀 Live Admin & Worker Panels Available:**
 - **Admin Panel**: `/admin/login` - Username: `123`, Password: `123`  
 - **Worker Panel**: `/worker/login` - Username: `worker`, Password: `worker123`
 
-A modern, responsive Notion clone built with Next.js 14, TypeScript, and Tailwind CSS. This project replicates Notion's clean and intuitive interface while adding comprehensive admin and worker management systems.
+A modern, responsive platform built with Next.js 14, TypeScript, and Tailwind CSS. Cognivex provides a clean and intuitive interface while adding comprehensive admin and worker management systems.
 
 ## 🚀 Live Demo
 
@@ -127,7 +127,7 @@ Specialized worker panel for quote request management accessible at `/worker/das
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/Turbo9k/notion.git
-   cd notion
+cd cognivex
    ```
 
 2. **Install dependencies**:
@@ -269,7 +269,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Design inspired by Notion
+- Modern design principles
 - Icons from Lucide React
 - Built with Next.js and TypeScript
 - Styled with Tailwind CSS
