@@ -1,25 +1,146 @@
 import { NextResponse } from 'next/server'
+import { connectDB } from '@/lib/mongodb'
+import AdminUser from '@/models/AdminUser'
 
+// GET /api/admin/credentials - Get all admin users/credentials
 export async function GET() {
   try {
-    // Return mock credentials data for demo
-    const mockCredentials = Array.from({ length: 89 }, (_, i) => ({
-      _id: `cred_${i + 1}`,
-      email: `user${i + 1}@example.com`,
-      username: `user${i + 1}`,
-      role: ['user', 'moderator', 'admin'][Math.floor(Math.random() * 3)],
-      status: ['active', 'inactive', 'suspended'][Math.floor(Math.random() * 3)],
-      provider: ['local', 'google', 'github', 'microsoft'][Math.floor(Math.random() * 4)],
-      lastLogin: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-      permissions: ['read', 'write', 'delete'].slice(0, Math.floor(Math.random() * 3) + 1)
-    }));
-
-    return NextResponse.json(mockCredentials)
+    await connectDB()
+    
+    // Get all admin users from database
+    let adminUsers = await AdminUser.find({}).sort({ createdAt: -1 })
+    
+    // If no admin users exist, create seed data
+    if (adminUsers.length === 0) {
+      console.log('No admin users found, creating seed data...')
+      
+      const seedUsers = Array.from({ length: 89 }, (_, i) => ({
+        email: `user${i + 1}@example.com`,
+        username: `user${i + 1}`,
+        role: ['admin', 'moderator', 'user'][Math.floor(Math.random() * 3)],
+        provider: ['local', 'google', 'github', 'microsoft'][Math.floor(Math.random() * 4)],
+        status: Math.random() > 0.1 ? 'active' : ['inactive', 'suspended'][Math.floor(Math.random() * 2)],
+        loginCount: Math.floor(Math.random() * 100),
+        lastLogin: Math.random() > 0.2 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
+        createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000)
+      }))
+      
+      await AdminUser.insertMany(seedUsers)
+      adminUsers = await AdminUser.find({}).sort({ createdAt: -1 })
+      console.log(`Created ${adminUsers.length} seed admin users`)
+    }
+    
+    return NextResponse.json({ 
+      success: true, 
+      credentials: adminUsers.map(user => ({
+        id: user._id.toString(),
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        provider: user.provider,
+        status: user.status,
+        loginCount: user.loginCount,
+        lastLogin: user.lastLogin?.toISOString() || null,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString()
+      }))
+    })
   } catch (error) {
-    console.error('Error fetching credentials:', error)
+    console.error('Error fetching admin users:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch credentials' },
+      { success: false, error: 'Failed to fetch credentials' },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT /api/admin/credentials - Update admin user
+export async function PUT(request: Request) {
+  try {
+    await connectDB()
+    
+    const { id, role, status } = await request.json()
+    
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'User ID is required' },
+        { status: 400 }
+      )
+    }
+    
+    const updateData: any = {}
+    if (role) updateData.role = role
+    if (status) updateData.status = status
+    
+    const updatedUser = await AdminUser.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    )
+    
+    if (!updatedUser) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: updatedUser._id.toString(),
+        email: updatedUser.email,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        provider: updatedUser.provider,
+        status: updatedUser.status,
+        loginCount: updatedUser.loginCount,
+        lastLogin: updatedUser.lastLogin?.toISOString() || null,
+        createdAt: updatedUser.createdAt.toISOString(),
+        updatedAt: updatedUser.updatedAt.toISOString()
+      }
+    })
+  } catch (error) {
+    console.error('Error updating admin user:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to update user' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/admin/credentials - Delete admin user
+export async function DELETE(request: Request) {
+  try {
+    await connectDB()
+    
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'User ID is required' },
+        { status: 400 }
+      )
+    }
+    
+    const deletedUser = await AdminUser.findByIdAndDelete(id)
+    
+    if (!deletedUser) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json({
+      success: true,
+      message: 'User deleted successfully'
+    })
+  } catch (error) {
+    console.error('Error deleting admin user:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete user' },
       { status: 500 }
     )
   }

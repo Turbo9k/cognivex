@@ -23,36 +23,61 @@ export default function WorkerDashboard() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
 
   useEffect(() => {
-    // Generate mock quote requests data
-    const mockQuoteRequests: QuoteRequest[] = Array.from({ length: 25 }, (_, i) => ({
-      id: `quote_${i + 1}`,
-      name: `Customer ${i + 1}`,
-      email: `customer${i + 1}@example.com`,
-      company: `Company ${i + 1}`,
-      message: `Request for quote on project ${i + 1}. Need pricing for services and timeline.`,
-      status: ['pending', 'approved', 'rejected'][Math.floor(Math.random() * 3)] as any,
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    }));
+    const fetchQuotes = async () => {
+      try {
+        const response = await fetch('/api/worker/quotes', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setQuoteRequests(data.quotes);
+          } else {
+            setError(data.error || 'Failed to fetch quotes');
+          }
+        } else {
+          setError('Failed to fetch quotes');
+        }
+      } catch (err) {
+        console.error('Error fetching quotes:', err);
+        setError('Failed to fetch quotes');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Simulate loading
-    setTimeout(() => {
-      setQuoteRequests(mockQuoteRequests);
-      setIsLoading(false);
-    }, 1000);
+    fetchQuotes();
   }, [])
 
   const handleStatusChange = async (id: string, newStatus: 'approved' | 'rejected') => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await fetch('/api/worker/quotes', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ id, status: newStatus }),
+      });
 
-      setQuoteRequests(prev =>
-        prev.map(request =>
-          request.id === id ? { ...request, status: newStatus } : request
-        )
-      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setQuoteRequests(prev =>
+            prev.map(request =>
+              request.id === id ? { ...request, status: newStatus } : request
+            )
+          );
+        } else {
+          setError(data.error || 'Failed to update status');
+        }
+      } else {
+        setError('Failed to update status');
+      }
     } catch (err) {
-      setError('Failed to update status')
+      console.error('Error updating quote:', err);
+      setError('Failed to update status');
     }
   }
 
