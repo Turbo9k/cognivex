@@ -8,27 +8,7 @@ export async function GET() {
     await connectDB()
     
     // Get all admin users from database
-    let adminUsers = await AdminUser.find({}).sort({ createdAt: -1 })
-    
-    // If no admin users exist, create seed data
-    if (adminUsers.length === 0) {
-      console.log('No admin users found, creating seed data...')
-      
-      const seedUsers = Array.from({ length: 89 }, (_, i) => ({
-        email: `user${i + 1}@example.com`,
-        username: `user${i + 1}`,
-        role: ['admin', 'moderator', 'user'][Math.floor(Math.random() * 3)],
-        provider: ['local', 'google', 'github', 'microsoft'][Math.floor(Math.random() * 4)],
-        status: Math.random() > 0.1 ? 'active' : ['inactive', 'suspended'][Math.floor(Math.random() * 2)],
-        loginCount: Math.floor(Math.random() * 100),
-        lastLogin: Math.random() > 0.2 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
-        createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000)
-      }))
-      
-      await AdminUser.insertMany(seedUsers)
-      adminUsers = await AdminUser.find({}).sort({ createdAt: -1 })
-      console.log(`Created ${adminUsers.length} seed admin users`)
-    }
+    const adminUsers = await AdminUser.find({}).sort({ createdAt: -1 })
     
     return NextResponse.json({ 
       success: true, 
@@ -37,9 +17,9 @@ export async function GET() {
         email: user.email,
         username: user.username,
         role: user.role,
-        provider: user.provider,
+        provider: user.provider || 'local',
         status: user.status,
-        loginCount: user.loginCount,
+        loginCount: user.loginCount || 0,
         lastLogin: user.lastLogin?.toISOString() || null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString()
@@ -48,7 +28,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching admin users:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch credentials' },
+      { success: false, error: 'Failed to fetch admin users', credentials: [] },
       { status: 500 }
     )
   }

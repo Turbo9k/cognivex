@@ -8,30 +8,7 @@ export async function GET() {
     await connectDB()
     
     // Get all active users from database
-    let activeUsers = await ActiveUser.find({}).sort({ lastActivity: -1 })
-    
-    // If no active users exist, create seed data
-    if (activeUsers.length === 0) {
-      console.log('No active users found, creating seed data...')
-      
-      const seedUsers = Array.from({ length: 45 }, (_, i) => ({
-        userId: `user_${i + 1}`,
-        username: `user${i + 1}`,
-        email: `user${i + 1}@example.com`,
-        status: ['online', 'away', 'idle'][Math.floor(Math.random() * 3)],
-        location: ['New York, US', 'London, UK', 'Tokyo, JP', 'Berlin, DE', 'Sydney, AU'][Math.floor(Math.random() * 5)],
-        ipAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-        browser: ['Chrome', 'Firefox', 'Safari', 'Edge'][Math.floor(Math.random() * 4)],
-        device: ['Desktop', 'Mobile', 'Tablet'][Math.floor(Math.random() * 3)],
-        sessionDuration: Math.floor(Math.random() * 480), // 0-8 hours in minutes
-        lastActivity: new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000), // Last 2 hours
-        sessionStart: new Date(Date.now() - Math.random() * 8 * 60 * 60 * 1000) // Last 8 hours
-      }))
-      
-      await ActiveUser.insertMany(seedUsers)
-      activeUsers = await ActiveUser.find({}).sort({ lastActivity: -1 })
-      console.log(`Created ${activeUsers.length} seed active users`)
-    }
+    const activeUsers = await ActiveUser.find({}).sort({ lastActivity: -1 })
     
     return NextResponse.json({ 
       success: true, 
@@ -47,14 +24,13 @@ export async function GET() {
         device: user.device,
         sessionDuration: user.sessionDuration,
         lastActivity: user.lastActivity.toISOString(),
-        sessionStart: user.sessionStart.toISOString(),
-        createdAt: user.createdAt.toISOString()
+        sessionStart: user.sessionStart.toISOString()
       }))
     })
   } catch (error) {
     console.error('Error fetching active users:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch active users' },
+      { success: false, error: 'Failed to fetch active users', activeUsers: [] },
       { status: 500 }
     )
   }

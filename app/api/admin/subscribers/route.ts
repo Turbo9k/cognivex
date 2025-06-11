@@ -15,19 +15,16 @@ export async function GET() {
       subscribers: subscribers.map(subscriber => ({
         id: subscriber._id.toString(),
         email: subscriber.email,
-        status: subscriber.status,
-        source: subscriber.source,
-        tags: subscriber.tags,
-        emailCount: subscriber.emailCount,
-        lastEmailSent: subscriber.lastEmailSent?.toISOString() || null,
+        status: subscriber.status || 'active',
+        source: subscriber.source || 'website',
         createdAt: subscriber.createdAt.toISOString(),
-        updatedAt: subscriber.updatedAt.toISOString()
+        updatedAt: subscriber.updatedAt?.toISOString() || subscriber.createdAt.toISOString()
       }))
     })
   } catch (error) {
     console.error('Error fetching subscribers:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch subscribers' },
+      { success: false, error: 'Failed to fetch subscribers', subscribers: [] },
       { status: 500 }
     )
   }

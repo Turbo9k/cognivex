@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
-// Use environment variable or fallback to hardcoded connection string with new credentials
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://iansiats26:3YMFNQ91ucTGnfOf@cluster0.fgigxod.mongodb.net/cognivex?retryWrites=true&w=majority&appName=Cluster0'
+// Use environment variable only - no fallback for security
+const MONGODB_URI = process.env.MONGODB_URI
 
 let isConnected = false
 
@@ -24,7 +24,7 @@ export async function connectDB() {
     }
 
     console.log('🔄 Attempting MongoDB connection...')
-    console.log('📡 Using connection string:', MONGODB_URI.replace(/:[^:]*@/, ':****@'))
+    // Don't log connection string for security
 
     // Connect to MongoDB with optimized options
     await mongoose.connect(MONGODB_URI, {

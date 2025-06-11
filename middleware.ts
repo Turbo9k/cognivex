@@ -28,10 +28,18 @@ export function middleware(request: NextRequest) {
     '/resources',
     '/pricing',
     '/contact',
-    '/admin/login', 
+    '/about',
+    '/admin/login',
+    '/admin/setup',
+    '/setup-admin',
+    '/reset-admin',
     '/worker/login',
     '/api/auth',
     '/api/admin/login',
+    '/api/admin/setup',
+    '/api/admin/setup-simple',
+    '/api/admin/check-users',
+    '/api/admin/create-user',
     '/api/auth/worker-login',
     '/api/auth/logout',
     '/api/auth/check-worker',
@@ -71,15 +79,16 @@ export function middleware(request: NextRequest) {
     }
 
     // Route analysis
-    const isAdminPath = pathname.startsWith('/admin') && pathname !== '/admin/login';
+    const isAdminPath = pathname.startsWith('/admin') && pathname !== '/admin/login' && pathname !== '/admin/setup';
     const isWorkerPath = pathname.startsWith('/worker') && pathname !== '/worker/login';
     const isDashboardPath = pathname === '/dashboard';
-    const isAdmin = payload.role === 'admin';
+    const isAdmin = payload.role === 'admin' || payload.role === 'super_admin' || payload.originalRole === 'super_admin';
     const isWorker = payload.role === 'worker';
     const isAuthenticated = payload.isAuthenticated;
 
-    // Admin access control (but allow access to admin login page)
+    // Admin access control (but allow access to admin login and setup pages)
     if (isAdminPath && !isAdmin) {
+      console.log(`Admin access denied. isAdmin: ${isAdmin}, role: ${payload.role}, originalRole: ${payload.originalRole}`);
       return NextResponse.redirect(new URL('/login', request.url));
     }
 

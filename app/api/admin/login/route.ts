@@ -52,9 +52,11 @@ export async function POST(request: NextRequest) {
     const tokenPayload = { 
       userId: adminUser._id.toString(),
       username: adminUser.username,
-      role: adminUser.role,
+      role: 'admin', // Standardize to 'admin' for middleware
+      originalRole: adminUser.role, // Keep original role
       email: adminUser.email,
-      permissions: adminUser.permissions
+      permissions: adminUser.permissions,
+      isAuthenticated: true // Required by middleware
     }
     
     console.log('Creating JWT token for admin:', adminUser.username)
