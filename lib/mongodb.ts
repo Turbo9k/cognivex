@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cognivex'
+const MONGODB_URI = process.env.MONGODB_URI
 
 let isConnected = false
 let connectionPromise: Promise<void> | null = null
@@ -8,6 +8,12 @@ let connectionPromise: Promise<void> | null = null
 export async function connectDB() {
   if (isConnected) {
     return
+  }
+
+  // If no MongoDB URI is provided, skip connection (for deployment without database)
+  if (!MONGODB_URI) {
+    console.log('No MongoDB URI provided, skipping database connection')
+    throw new Error('No MongoDB URI provided')
   }
 
   // If connection is already in progress, wait for it
@@ -36,8 +42,10 @@ export async function connectDB() {
       isConnected = false
       connectionPromise = null
       
-      // Don't throw error, just log it to allow the app to continue without database
-      console.log('Continuing without MongoDB connection...')
+      // Don't throw error during build process
+      if (process.env.NODE_ENV === 'production') {
+        console.log('Continuing without MongoDB connection in production...')
+      }
       reject(error)
     }
   })
