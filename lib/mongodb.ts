@@ -1,54 +1,75 @@
 import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI
+// Use environment variable or fallback to hardcoded connection string with new credentials
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://iansiats26:3YMFNQ91ucTGnfOf@cluster0.fgigxod.mongodb.net/cognivex?retryWrites=true&w=majority&appName=Cluster0'
 
 let isConnected = false
-let connectionPromise: Promise<void> | null = null
 
 export async function connectDB() {
-  if (isConnected) {
+  // If already connected, return early
+  if (isConnected && mongoose.connection.readyState === 1) {
     return
   }
 
-  // If no MongoDB URI is provided, skip connection (for deployment without database)
+  // If no MongoDB URI is provided, throw error
   if (!MONGODB_URI) {
-    console.log('No MongoDB URI provided, skipping database connection')
-    throw new Error('No MongoDB URI provided')
+    console.error('MONGODB_URI environment variable is not set')
+    throw new Error('Database configuration error')
   }
 
-  // If connection is already in progress, wait for it
-  if (connectionPromise) {
-    return connectionPromise
-  }
-
-  connectionPromise = new Promise(async (resolve, reject) => {
-    try {
-      // Optimize mongoose connection options
-      await mongoose.connect(MONGODB_URI, {
-        serverSelectionTimeoutMS: 3000, // Timeout after 3s instead of 30s
-        connectTimeoutMS: 3000,
-        socketTimeoutMS: 3000,
-        maxPoolSize: 10, // Maintain up to 10 socket connections
-      })
-      
-      // Disable mongoose buffering for faster responses
-      mongoose.set('bufferCommands', false)
-      
-      isConnected = true
-      console.log('MongoDB connected successfully')
-      resolve()
-    } catch (error) {
-      console.error('MongoDB connection error:', error)
-      isConnected = false
-      connectionPromise = null
-      
-      // Don't throw error during build process
-      if (process.env.NODE_ENV === 'production') {
-        console.log('Continuing without MongoDB connection in production...')
-      }
-      reject(error)
+  try {
+    // Disconnect if there's an existing connection in a bad state
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect()
     }
-  })
 
-  return connectionPromise
-} 
+    console.log('🔄 Attempting MongoDB connection...')
+    console.log('📡 Using connection string:', MONGODB_URI.replace(/:[^:]*@/, ':****@'))
+
+    // Connect to MongoDB with optimized options
+    await mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+    })
+    
+    isConnected = true
+    console.log('✅ MongoDB connected successfully')
+    
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error)
+    isConnected = false
+    
+    // Provide more specific error information
+    if (error instanceof Error) {
+      console.error('Error details:', error.message)
+      if (error.message.includes('authentication failed')) {
+        throw new Error('Database authentication failed - check username/password')
+      } else if (error.message.includes('ENOTFOUND')) {
+        throw new Error('Database server not found')
+      } else if (error.message.includes('timeout')) {
+        throw new Error('Database connection timeout')
+      }
+    }
+    
+    throw new Error('Database connection failed')
+  }
+}
+
+// Handle connection events
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to MongoDB')
+  isConnected = true
+})
+
+mongoose.connection.on('error', (err) => {
+  console.error('Mongoose connection error:', err)
+  isConnected = false
+})
+
+mongoose.connection.on('disconnected', () => {
+  console.log('Mongoose disconnected from MongoDB')
+  isConnected = false
+}) 

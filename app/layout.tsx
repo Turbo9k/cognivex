@@ -21,9 +21,9 @@ export default function RootLayout({
       <body className={`${inter.className} h-full bg-white dark:bg-gray-900 transition-colors duration-200`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+          defaultTheme="dark"
+          enableSystem={false}
+          storageKey="cognivex-theme"
         >
           <Navigation />
           <main>{children}</main>

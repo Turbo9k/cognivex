@@ -8,26 +8,7 @@ export async function GET() {
     await connectDB()
     
     // Get all subscribers from database
-    let subscribers = await Subscriber.find({}).sort({ createdAt: -1 })
-    
-    // If no subscribers exist, create seed data
-    if (subscribers.length === 0) {
-      console.log('No subscribers found, creating seed data...')
-      
-      const seedSubscribers = Array.from({ length: 150 }, (_, i) => ({
-        email: `subscriber${i + 1}@example.com`,
-        status: Math.random() > 0.2 ? 'active' : 'inactive',
-        source: ['website', 'social', 'referral', 'direct'][Math.floor(Math.random() * 4)],
-        tags: Math.random() > 0.5 ? ['newsletter'] : [],
-        emailCount: Math.floor(Math.random() * 20),
-        lastEmailSent: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000) : null,
-        createdAt: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000)
-      }))
-      
-      await Subscriber.insertMany(seedSubscribers)
-      subscribers = await Subscriber.find({}).sort({ createdAt: -1 })
-      console.log(`Created ${subscribers.length} seed subscribers`)
-    }
+    const subscribers = await Subscriber.find({}).sort({ createdAt: -1 })
     
     return NextResponse.json({ 
       success: true, 

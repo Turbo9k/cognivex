@@ -2,13 +2,23 @@ import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import Subscriber from '@/models/Subscriber'
 
+export const runtime = 'nodejs'
+
 export async function GET() {
   try {
     await connectDB()
-    const subscribers = await Subscriber.find({}).sort({ createdAt: -1 })
-    return NextResponse.json(subscribers)
+    
+    // Fetch all subscribers, sorted by creation date (newest first)
+    const subscribers = await Subscriber.find()
+      .sort({ createdAt: -1 })
+      .select('email status source createdAt updatedAt')
+      .lean()
+    
+    return NextResponse.json(subscribers, { status: 200 })
+    
   } catch (error) {
     console.error('Error fetching subscribers:', error)
+    
     return NextResponse.json(
       { error: 'Failed to fetch subscribers' },
       { status: 500 }

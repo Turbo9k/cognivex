@@ -1,51 +1,75 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
+import { connectDB } from '@/lib/mongodb'
+import AdminUser from '@/models/AdminUser'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-// Admin credentials (in production, this should be in a database with hashed passwords)
-const ADMIN_CREDENTIALS = {
-  username: process.env.ADMIN_USERNAME || '123',
-  password: process.env.ADMIN_PASSWORD || '123',
-}
 
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()
     console.log('Admin login attempt:', { username })
 
-    // Validate credentials
-    if (username !== ADMIN_CREDENTIALS.username || password !== ADMIN_CREDENTIALS.password) {
-      console.log('Invalid credentials provided')
+    // Connect to MongoDB
+    await connectDB()
+
+    // Find admin user by username
+    const adminUser = await AdminUser.findOne({ username: username.trim() })
+    
+    if (!adminUser) {
+      console.log('Admin user not found:', username)
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       )
     }
 
+    // Check if account is active
+    if (adminUser.status !== 'active') {
+      console.log('Admin account not active:', adminUser.status)
+      return NextResponse.json(
+        { error: 'Account is inactive or suspended' },
+        { status: 401 }
+      )
+    }
+
+    // Verify password
+    const isPasswordValid = await adminUser.comparePassword(password)
+    
+    if (!isPasswordValid) {
+      console.log('Invalid password for admin user:', username)
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      )
+    }
+
+    // Update login info
+    await adminUser.updateLoginInfo()
+
     // Create JWT token for admin
     const tokenPayload = { 
-      userId: 'admin', 
-      username: username,
-      role: 'admin',
-      email: 'admin@example.com'
+      userId: adminUser._id.toString(),
+      username: adminUser.username,
+      role: adminUser.role,
+      email: adminUser.email,
+      permissions: adminUser.permissions
     }
     
-    console.log('Creating JWT token with payload:', tokenPayload)
+    console.log('Creating JWT token for admin:', adminUser.username)
     
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' })
-    
-    console.log('JWT token created:', token.substring(0, 20) + '...')
 
     const response = NextResponse.json(
       { 
         message: 'Login successful',
         user: {
-          id: 'admin',
-          username: username,
-          role: 'admin',
-          email: 'admin@example.com'
+          id: adminUser._id.toString(),
+          username: adminUser.username,
+          role: adminUser.role,
+          email: adminUser.email,
+          permissions: adminUser.permissions
         }
       },
       { status: 200 }
@@ -61,8 +85,6 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/',
     }
-    
-    console.log('Setting cookie with options:', { ...cookieOptions, value: cookieOptions.value.substring(0, 20) + '...' })
     
     response.cookies.set(cookieOptions)
 

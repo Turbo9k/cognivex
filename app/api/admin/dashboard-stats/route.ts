@@ -1,195 +1,182 @@
 import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
+import User from '@/models/User'
 import Subscriber from '@/models/Subscriber'
 import Quote from '@/models/Quote'
-import Login from '@/models/Login'
-import User from '@/models/User'
-import ActiveUser from '@/models/ActiveUser'
+
+export const runtime = 'nodejs'
 
 export async function GET() {
   try {
+    // Connect to MongoDB
     await connectDB()
-    
-    // Get current timestamp for "today" calculations
-    const now = new Date()
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
-    
+
     // Fetch all statistics in parallel
     const [
       totalUsers,
       totalSubscribers,
+      totalQuotes,
       activeUsers,
-      quotes,
-      todayLogins,
-      recentActivity
+      pendingQuotes,
+      approvedQuotes,
+      rejectedQuotes,
+      recentSubscribers,
+      recentLogins,
+      recentQuoteRequests
     ] = await Promise.all([
-      // Total users
-      User.countDocuments({}),
+      // Total users count
+      User.countDocuments(),
       
-      // Total subscribers
-      Subscriber.countDocuments({}),
+      // Total subscribers count
+      Subscriber.countDocuments(),
       
-      // Active users (logged in within last 30 minutes)
-      Login.countDocuments({
-        lastLogin: { $gte: thirtyMinutesAgo },
-        success: true
+      // Total quotes count
+      Quote.countDocuments(),
+      
+      // Active users (logged in within last 24 hours)
+      User.countDocuments({
+        lastLogin: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
       }),
       
-      // All quotes with status breakdown
-      Quote.find({}).lean(),
+      // Quote analytics
+      Quote.countDocuments({ status: 'pending' }),
+      Quote.countDocuments({ status: 'approved' }),
+      Quote.countDocuments({ status: 'rejected' }),
       
-      // Today's login count
-      Login.countDocuments({
-        lastLogin: { $gte: todayStart },
-        success: true
-      }),
+      // Recent subscribers (last 10)
+      Subscriber.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('email createdAt'),
       
-      // Recent activity (last 10 items)
-      Promise.all([
-        Login.find({ success: true })
-          .sort({ lastLogin: -1 })
-          .limit(3)
-          .lean(),
-        Subscriber.find({})
-          .sort({ createdAt: -1 })
-          .limit(3)
-          .lean(),
-        Quote.find({})
-          .sort({ createdAt: -1 })
-          .limit(4)
-          .lean()
-      ])
+      // Recent logins for activity feed
+      User.find({ lastLogin: { $exists: true } })
+        .sort({ lastLogin: -1 })
+        .limit(5)
+        .select('email lastLogin'),
+      
+      // Recent quote requests for activity feed
+      Quote.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('clientEmail createdAt status')
     ])
 
-    // Process quotes statistics
-    const quoteStats = {
-      total: quotes.length,
-      pending: quotes.filter(q => q.status === 'pending').length,
-      approved: quotes.filter(q => q.status === 'approved').length,
-      rejected: quotes.filter(q => q.status === 'rejected').length
-    }
-
     // Build recent activity feed
-    const activityFeed: Array<{
-      id: string;
-      type: string;
-      description: string;
-      timestamp: string;
-      user: string;
+    const recentActivity: Array<{
+      type: 'login' | 'subscription' | 'quote'
+      user: string
+      time: string
+      details: string
     }> = []
-    
+
     // Add recent logins
-    recentActivity[0].forEach(login => {
-      activityFeed.push({
-        id: `login_${login._id}`,
-        type: 'login',
-        description: `User logged in`,
-        timestamp: login.lastLogin,
-        user: login.email
-      })
+    recentLogins.forEach(login => {
+      if (login.lastLogin) {
+        recentActivity.push({
+          type: 'login',
+          user: login.email,
+          time: formatTimeAgo(login.lastLogin),
+          details: 'User logged in'
+        })
+      }
     })
-    
-    // Add recent subscribers
-    recentActivity[1].forEach(subscriber => {
-      activityFeed.push({
-        id: `sub_${subscriber._id}`,
+
+    // Add recent subscriptions
+    recentSubscribers.slice(0, 3).forEach(subscriber => {
+      recentActivity.push({
         type: 'subscription',
-        description: 'New user subscribed to newsletter',
-        timestamp: subscriber.createdAt,
-        user: subscriber.email
+        user: subscriber.email,
+        time: formatTimeAgo(subscriber.createdAt),
+        details: 'New subscription'
       })
     })
-    
-    // Add recent quotes
-    recentActivity[2].forEach(quote => {
-      activityFeed.push({
-        id: `quote_${quote._id}`,
+
+    // Add recent quote requests
+    recentQuoteRequests.forEach(quote => {
+      recentActivity.push({
         type: 'quote',
-        description: `New quote request from ${quote.company || 'client'}`,
-        timestamp: quote.createdAt,
-        user: quote.email
+        user: quote.clientEmail || 'Anonymous',
+        time: formatTimeAgo(quote.createdAt),
+        details: `Quote request ${quote.status}`
       })
     })
-    
-    // Sort activity by timestamp (most recent first)
-    activityFeed.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    
+
+    // Sort by most recent and limit to 10
+    recentActivity.sort((a, b) => {
+      const timeA = parseTimeAgo(a.time)
+      const timeB = parseTimeAgo(b.time)
+      return timeA - timeB
+    })
+
     const stats = {
       totalUsers,
       totalSubscribers,
+      totalQuotes,
       activeUsers,
-      totalQuotes: quoteStats.total,
-      pendingQuotes: quoteStats.pending,
-      approvedQuotes: quoteStats.approved,
-      rejectedQuotes: quoteStats.rejected,
-      todayLogins,
-      recentActivity: activityFeed.slice(0, 10) // Take top 10 most recent
+      recentActivity: recentActivity.slice(0, 10),
+      quoteAnalytics: {
+        pending: pendingQuotes,
+        approved: approvedQuotes,
+        rejected: rejectedQuotes,
+        totalProcessed: pendingQuotes + approvedQuotes + rejectedQuotes
+      },
+      recentSubscribers: recentSubscribers.map(sub => ({
+        email: sub.email,
+        createdAt: sub.createdAt.toISOString()
+      }))
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       stats,
-      lastUpdated: new Date().toISOString()
+      message: 'Dashboard statistics retrieved successfully'
     })
     
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
     
-    // Return mock data if database fails
-    const mockStats = {
-      totalUsers: 1247 + Math.floor(Math.random() * 10), // Add some variation
-      totalSubscribers: 89 + Math.floor(Math.random() * 5),
-      activeUsers: 15 + Math.floor(Math.random() * 15),
-      totalQuotes: 156 + Math.floor(Math.random() * 10),
-      pendingQuotes: 8 + Math.floor(Math.random() * 8),
-      approvedQuotes: 98 + Math.floor(Math.random() * 5),
-      rejectedQuotes: 46 + Math.floor(Math.random() * 3),
-      todayLogins: 30 + Math.floor(Math.random() * 20),
-      recentActivity: [
-        {
-          id: '1',
-          type: 'login',
-          description: 'Admin user logged in',
-          timestamp: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-          user: 'admin@cognivex.com'
-        },
-        {
-          id: '2',
-          type: 'quote',
-          description: 'New quote request from TechCorp',
-          timestamp: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-          user: 'client@techcorp.com'
-        },
-        {
-          id: '3',
-          type: 'subscription',
-          description: 'New user subscribed to newsletter',
-          timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-          user: 'newuser@example.com'
-        },
-        {
-          id: '4',
-          type: 'login',
-          description: 'Worker dashboard accessed',
-          timestamp: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-          user: 'worker@cognivex.com'
-        },
-        {
-          id: '5',
-          type: 'quote',
-          description: 'Quote approved for StartupXYZ',
-          timestamp: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
-          user: 'contact@startupxyz.com'
-        }
-      ]
-    }
-    
-    return NextResponse.json({ 
-      success: false, 
-      stats: mockStats,
-      error: 'Using mock data - database connection failed',
-      lastUpdated: new Date().toISOString()
-    })
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch dashboard statistics. Please check database connection.',
+      stats: null
+    }, { status: 500 })
+  }
+}
+
+// Helper function to format time ago
+function formatTimeAgo(date: Date): string {
+  const now = new Date()
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInMins = Math.floor(diffInMs / (1000 * 60))
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+  if (diffInMins < 1) {
+    return 'just now'
+  } else if (diffInMins < 60) {
+    return `${diffInMins}m ago`
+  } else if (diffInHours < 24) {
+    return `${diffInHours}h ago`
+  } else {
+    return `${diffInDays}d ago`
+  }
+}
+
+// Helper function to parse time ago back to milliseconds for sorting
+function parseTimeAgo(timeStr: string): number {
+  if (timeStr === 'just now') return 0
+  
+  const match = timeStr.match(/(\d+)([mhd]) ago/)
+  if (!match) return 0
+  
+  const value = parseInt(match[1])
+  const unit = match[2]
+  
+  switch (unit) {
+    case 'm': return value * 60 * 1000
+    case 'h': return value * 60 * 60 * 1000
+    case 'd': return value * 24 * 60 * 60 * 1000
+    default: return 0
   }
 } 

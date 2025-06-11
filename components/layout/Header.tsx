@@ -1,15 +1,18 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
+  const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email')
+    setIsSubmitting(true)
     
     try {
       const response = await fetch('/api/subscribe', {
@@ -20,15 +23,19 @@ export default function Header() {
         body: JSON.stringify({ email }),
       })
       
+      const data = await response.json()
+      
       if (response.ok) {
         alert('Thank you for subscribing!')
-        e.currentTarget.reset()
+        setEmail('')
       } else {
-        alert('Something went wrong. Please try again.')
+        alert(data.error || 'Something went wrong. Please try again.')
       }
     } catch (error) {
       console.error('Error:', error)
       alert('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -58,16 +65,19 @@ export default function Header() {
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <input
               type="email"
-              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
+              disabled={isSubmitting}
             />
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Get Started
+              {isSubmitting ? 'Subscribing...' : 'Get Started'}
             </button>
           </form>
           <button

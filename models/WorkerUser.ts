@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 
-const adminUserSchema = new mongoose.Schema({
+const workerUserSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -24,8 +24,8 @@ const adminUserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'admin',
-    enum: ['admin', 'super_admin']
+    default: 'worker',
+    enum: ['worker', 'senior_worker', 'supervisor']
   },
   status: {
     type: String,
@@ -35,16 +35,23 @@ const adminUserSchema = new mongoose.Schema({
   permissions: [{
     type: String,
     enum: [
-      'dashboard_view',
-      'subscribers_view',
-      'subscribers_manage',
       'quotes_view',
-      'quotes_manage',
-      'users_view',
-      'users_manage',
-      'settings_manage'
+      'quotes_process',
+      'reports_view',
+      'analytics_view',
+      'tasks_manage'
     ]
   }],
+  department: {
+    type: String,
+    enum: ['quotes', 'support', 'sales', 'general'],
+    default: 'general'
+  },
+  employeeId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   lastLogin: {
     type: Date,
     default: null
@@ -55,7 +62,7 @@ const adminUserSchema = new mongoose.Schema({
   },
   createdBy: {
     type: String,
-    default: 'system'
+    default: 'admin'
   },
   createdAt: {
     type: Date,
@@ -68,7 +75,7 @@ const adminUserSchema = new mongoose.Schema({
 })
 
 // Hash password before saving
-adminUserSchema.pre('save', async function(next) {
+workerUserSchema.pre('save', async function(next) {
   // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next()
   
@@ -83,21 +90,21 @@ adminUserSchema.pre('save', async function(next) {
 })
 
 // Update the updatedAt field before saving
-adminUserSchema.pre('save', function(next) {
+workerUserSchema.pre('save', function(next) {
   this.updatedAt = new Date()
   next()
 })
 
 // Method to check password
-adminUserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+workerUserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password)
 }
 
 // Method to update login info
-adminUserSchema.methods.updateLoginInfo = function() {
+workerUserSchema.methods.updateLoginInfo = function() {
   this.lastLogin = new Date()
   this.loginCount = (this.loginCount || 0) + 1
   return this.save()
 }
 
-export default mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema) 
+export default mongoose.models.WorkerUser || mongoose.model('WorkerUser', workerUserSchema) 
