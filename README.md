@@ -9,8 +9,8 @@ A modern, responsive platform built with Next.js 14, TypeScript, and Tailwind CS
 ## 🚀 Live Demo
 
 **Admin Panel**: `/admin/login`
-- **Username**: `123`
-- **Password**: `123`
+- **Username**: `test`
+- **Password**: `testtest`
 
 **Worker Panel**: `/worker/login`
 - **Username**: `worker`  
