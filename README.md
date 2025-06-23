@@ -1,7 +1,7 @@
 # Cognivex - Admin & Worker Management System
 
 **🚀 Live Admin & Worker Panels Available:**
-- **Admin Panel**: `/admin/login` - Username: `123`, Password: `123`  
+- **Admin Panel**: `/admin/login` - Username: `test`, Password: `testtest`  
 - **Worker Panel**: `/worker/login` - Username: `worker`, Password: `worker123`
 
 A modern, responsive platform built with Next.js 14, TypeScript, and Tailwind CSS. Cognivex provides a clean and intuitive interface while adding comprehensive admin and worker management systems.
