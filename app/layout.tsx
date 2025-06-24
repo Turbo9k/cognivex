@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Navigation from '@/components/layout/Navigation'
 import { ThemeProvider } from '@/components/theme-provider'
-import Header from '@/components/layout/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,7 +31,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
           <Navigation />
           <main>{children}</main>
         </ThemeProvider>
