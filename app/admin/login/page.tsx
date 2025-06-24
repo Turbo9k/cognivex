@@ -44,7 +44,7 @@ export default function AdminLogin() {
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} py-12 px-4 sm:px-6 lg:px-8`}>
-      <div className="max-w-md w-full space-y-8">
+      <div className={`max-w-md w-full space-y-8 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-8 rounded-lg shadow-lg`}>
         <div>
           <h2 className={`mt-6 text-center text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Admin Login
@@ -109,6 +109,12 @@ export default function AdminLogin() {
             </button>
           </div>
         </form>
+        
+        <div className="mt-4 text-center">
+          <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            Use: test / testtest
+          </p>
+        </div>
       </div>
     </div>
   )

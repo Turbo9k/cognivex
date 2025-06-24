@@ -182,7 +182,7 @@ export default function WorkerLogin() {
           fontSize: '0.75rem',
           color: theme === 'dark' ? '#9ca3af' : '#6b7280'
         }}>
-          Use: worker / worker
+          Use: worker / worker123
         </div>
       </div>
     </div>

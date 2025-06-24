@@ -31,21 +31,19 @@ export default function ActiveUsersPage() {
   useEffect(() => {
     const fetchActiveUsers = async () => {
       try {
-        // Mock data for demonstration
-        const mockUsers: ActiveUser[] = Array.from({ length: 45 }, (_, i) => ({
-          _id: `user_${i + 1}`,
-          email: `user${i + 1}@example.com`,
-          lastActivity: new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString(),
-          sessionDuration: Math.floor(Math.random() * 180 + 10), // 10-190 minutes
-          ipAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-          userAgent: ['Chrome', 'Firefox', 'Safari', 'Edge'][Math.floor(Math.random() * 4)],
-          location: ['New York, US', 'London, UK', 'Tokyo, JP', 'Sydney, AU', 'Toronto, CA'][Math.floor(Math.random() * 5)],
-          status: ['online', 'away', 'idle'][Math.floor(Math.random() * 3)] as 'online' | 'away' | 'idle'
-        }))
+        setLoading(true)
+        const response = await fetch('/api/admin/active-users')
+        const data = await response.json()
         
-        setActiveUsers(mockUsers)
+        if (data.success) {
+          setActiveUsers(data.activeUsers || [])
+        } else {
+          console.error('Failed to fetch active users:', data.error)
+          setActiveUsers([])
+        }
       } catch (error) {
         console.error('Error fetching active users:', error)
+        setActiveUsers([])
       } finally {
         setLoading(false)
       }

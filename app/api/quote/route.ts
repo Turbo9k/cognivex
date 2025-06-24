@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { readData, writeData } from '@/lib/data'
+import { connectDB } from '@/lib/mongodb'
+import Quote from '@/models/Quote'
 
 export async function POST(request: Request) {
   try {
@@ -26,15 +28,31 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString()
     }
 
-    // Read existing data
+    // Read existing data and save to file system (for backward compatibility)
     const data = readData()
-    
-    // Add new quote
     data.quotes.push(quote)
     
-    // Save to file
     if (!writeData(data)) {
-      throw new Error('Failed to save quote')
+      throw new Error('Failed to save quote to file system')
+    }
+
+    // Also save to MongoDB for admin/worker access
+    try {
+      await connectDB()
+      
+      const mongoQuote = new Quote({
+        name,
+        email,
+        company,
+        message,
+        status: 'pending'
+      })
+      
+      await mongoQuote.save()
+      console.log('Quote saved to MongoDB successfully')
+    } catch (mongoError) {
+      console.error('Failed to save quote to MongoDB:', mongoError)
+      // Continue with file system save even if MongoDB fails
     }
 
     console.log('Quote created successfully:', quote)

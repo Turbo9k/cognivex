@@ -190,7 +190,7 @@ Report generated on ${new Date().toLocaleString()}
     },
     {
       title: 'Credentials',
-      description: 'Manage user credentials',
+      description: 'Admin Credentials for where logins are stored',
       href: '/admin/credentials',
       icon: KeyIcon,
       count: stats.totalCredentials,

@@ -23,6 +23,7 @@ interface LoginRecord {
   status: 'success' | 'failed' | 'blocked'
   method: 'password' | 'oauth' | 'token'
   deviceType: 'desktop' | 'mobile' | 'tablet'
+  browser?: string
 }
 
 export default function LoginHistoryPage() {
@@ -37,24 +38,20 @@ export default function LoginHistoryPage() {
   useEffect(() => {
     const fetchLogins = async () => {
       try {
-        // Mock data for demonstration
-        const mockLogins: LoginRecord[] = Array.from({ length: 1230 }, (_, i) => ({
-          _id: `login_${i + 1}`,
-          email: `user${Math.floor(Math.random() * 200) + 1}@example.com`,
-          loginTime: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-          ipAddress: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-          userAgent: ['Chrome', 'Firefox', 'Safari', 'Edge', 'Mobile Safari', 'Chrome Mobile'][Math.floor(Math.random() * 6)],
-          location: ['New York, US', 'London, UK', 'Tokyo, JP', 'Sydney, AU', 'Toronto, CA', 'Berlin, DE', 'Paris, FR'][Math.floor(Math.random() * 7)],
-          status: ['success', 'success', 'success', 'success', 'failed', 'blocked'][Math.floor(Math.random() * 6)] as 'success' | 'failed' | 'blocked',
-          method: ['password', 'oauth', 'token'][Math.floor(Math.random() * 3)] as 'password' | 'oauth' | 'token',
-          deviceType: ['desktop', 'mobile', 'tablet'][Math.floor(Math.random() * 3)] as 'desktop' | 'mobile' | 'tablet'
-        }))
+        setLoading(true)
+        const response = await fetch('/api/admin/logins')
+        const data = await response.json()
         
-        // Sort by most recent first
-        mockLogins.sort((a, b) => new Date(b.loginTime).getTime() - new Date(a.loginTime).getTime())
-        setLogins(mockLogins)
+        if (data.success) {
+          setLogins(data.logins)
+        } else {
+          console.error('Failed to fetch logins:', data.error)
+          // Fallback to empty array if API fails
+          setLogins([])
+        }
       } catch (error) {
         console.error('Error fetching login history:', error)
+        setLogins([])
       } finally {
         setLoading(false)
       }
@@ -64,9 +61,8 @@ export default function LoginHistoryPage() {
   }, [])
 
   const filteredLogins = logins.filter(login => {
-    const matchesSearch = login.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         login.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         login.ipAddress.includes(searchTerm)
+    const matchesSearch = login.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         login.location?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || login.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -102,15 +98,14 @@ export default function LoginHistoryPage() {
 
   const exportLogins = () => {
     const csvContent = [
-      ['Email', 'Login Time', 'Status', 'IP Address', 'Location', 'Device', 'Method'],
+      ['Email', 'Login Time', 'Status', 'Location', 'Browser', 'Method'],
       ...filteredLogins.map(login => [
         login.email, 
         login.loginTime, 
         login.status, 
-        login.ipAddress, 
         login.location, 
-        login.deviceType, 
-        login.method
+        login.browser || 'Unknown', 
+        login.method || 'password'
       ])
     ].map(row => row.join(',')).join('\n')
     

@@ -37,22 +37,23 @@ export default function CredentialsPage() {
   useEffect(() => {
     const fetchCredentials = async () => {
       try {
-        // Mock data for demonstration
-        const mockCredentials: Credential[] = Array.from({ length: 89 }, (_, i) => ({
-          _id: `cred_${i + 1}`,
-          username: `user${i + 1}`,
-          email: `user${i + 1}@example.com`,
-          role: ['admin', 'user', 'user', 'user', 'moderator'][Math.floor(Math.random() * 5)] as 'admin' | 'user' | 'moderator',
-          status: ['active', 'active', 'active', 'inactive', 'suspended'][Math.floor(Math.random() * 5)] as 'active' | 'inactive' | 'suspended',
-          lastLogin: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-          createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-          permissions: ['read', 'write', 'delete', 'admin'].slice(0, Math.floor(Math.random() * 4) + 1),
-          provider: ['local', 'google', 'github', 'microsoft'][Math.floor(Math.random() * 4)] as 'local' | 'google' | 'github' | 'microsoft'
-        }))
+        setLoading(true)
+        const response = await fetch('/api/admin/credentials')
+        const data = await response.json()
         
-        setCredentials(mockCredentials)
+        if (data.success) {
+          // Filter to show only credentials created by the website (local provider)
+          const websiteCredentials = data.credentials.filter((cred: any) => 
+            cred.provider === 'local' || !cred.provider
+          )
+          setCredentials(websiteCredentials)
+        } else {
+          console.error('Failed to fetch credentials:', data.error)
+          setCredentials([])
+        }
       } catch (error) {
         console.error('Error fetching credentials:', error)
+        setCredentials([])
       } finally {
         setLoading(false)
       }

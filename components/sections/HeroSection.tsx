@@ -24,6 +24,7 @@ export default function HeroSection() {
           <p className="mt-4 text-lg leading-8 text-muted-foreground">
             Cognivex is the connected workspace where better, faster work happens. Now with intelligent automation and streamlined management tools.
           </p>
+          
           <div className="mt-6 flex items-center justify-center gap-x-6">
             <div className="flex items-center -mt-3">
               <EmailSubscription />
