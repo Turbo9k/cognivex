@@ -29,6 +29,7 @@ interface LoginRecord {
 
 export default function LoginHistoryPage() {
   const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [logins, setLogins] = useState<LoginRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -36,6 +37,10 @@ export default function LoginHistoryPage() {
   const [accountTypeFilter, setAccountTypeFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 15
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchLogins = async () => {
@@ -58,8 +63,10 @@ export default function LoginHistoryPage() {
       }
     }
 
-    fetchLogins()
-  }, [])
+    if (mounted) {
+      fetchLogins()
+    }
+  }, [mounted])
 
   const filteredLogins = logins.filter(login => {
     const matchesSearch = login.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -130,6 +137,15 @@ export default function LoginHistoryPage() {
     a.href = url
     a.download = 'login-history.csv'
     a.click()
+  }
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    )
   }
 
   if (loading) {

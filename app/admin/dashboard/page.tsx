@@ -21,6 +21,7 @@ interface RealStats {
 
 export default function AdminDashboard() {
   const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState<RealStats>({
     totalSubscribers: 0,
     activeUsers: 0,
@@ -29,6 +30,10 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchRealStats = async () => {
@@ -71,8 +76,10 @@ export default function AdminDashboard() {
       }
     };
 
-    fetchRealStats();
-  }, []);
+    if (mounted) {
+      fetchRealStats();
+    }
+  }, [mounted]);
 
   const handleExportSubscribers = async () => {
     setLoading(true);
@@ -197,6 +204,20 @@ Report generated on ${new Date().toLocaleString()}
       color: 'bg-orange-500'
     }
   ];
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-900 dark:text-white">
+            Loading theme...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && stats.totalSubscribers === 0) {
     return (
