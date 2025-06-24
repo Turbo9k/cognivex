@@ -44,6 +44,22 @@ export async function POST(request: Request) {
     
     if (!workerUser) {
       console.log('Worker user not found:', username)
+      
+      // Track failed login attempt
+      try {
+        await fetch(`${request.headers.get('origin') || 'http://localhost:3000'}/api/auth/track-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: username,
+            success: false,
+            accountType: 'worker'
+          })
+        })
+      } catch (trackError) {
+        console.error('Failed to track login:', trackError)
+      }
+      
       return NextResponse.json(
         { error: 'Invalid worker credentials' },
         { status: 401 }
@@ -53,6 +69,22 @@ export async function POST(request: Request) {
     // Check if account is active
     if (workerUser.status !== 'active') {
       console.log('Worker account not active:', workerUser.status)
+      
+      // Track failed login attempt
+      try {
+        await fetch(`${request.headers.get('origin') || 'http://localhost:3000'}/api/auth/track-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: workerUser.email || username,
+            success: false,
+            accountType: 'worker'
+          })
+        })
+      } catch (trackError) {
+        console.error('Failed to track login:', trackError)
+      }
+      
       return NextResponse.json(
         { error: 'Account is inactive or suspended' },
         { status: 401 }
@@ -64,6 +96,22 @@ export async function POST(request: Request) {
     
     if (!isPasswordValid) {
       console.log('Invalid password for worker user:', username)
+      
+      // Track failed login attempt
+      try {
+        await fetch(`${request.headers.get('origin') || 'http://localhost:3000'}/api/auth/track-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: workerUser.email || username,
+            success: false,
+            accountType: 'worker'
+          })
+        })
+      } catch (trackError) {
+        console.error('Failed to track login:', trackError)
+      }
+      
       return NextResponse.json(
         { error: 'Invalid worker credentials' },
         { status: 401 }
@@ -72,6 +120,21 @@ export async function POST(request: Request) {
 
     // Update login info
     await workerUser.updateLoginInfo()
+
+    // Track successful login
+    try {
+      await fetch(`${request.headers.get('origin') || 'http://localhost:3000'}/api/auth/track-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: workerUser.email || username,
+          success: true,
+          accountType: 'worker'
+        })
+      })
+    } catch (trackError) {
+      console.error('Failed to track login:', trackError)
+    }
 
     console.log('Worker credentials validated successfully for:', workerUser.username);
     

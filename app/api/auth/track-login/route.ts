@@ -4,7 +4,7 @@ import Login from '@/models/Login'
 
 export async function POST(request: Request) {
   try {
-    const { email, success } = await request.json()
+    const { email, success, accountType = 'user' } = await request.json()
     const ipAddress = request.headers.get('x-forwarded-for') || 'unknown'
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
@@ -15,6 +15,7 @@ export async function POST(request: Request) {
       ipAddress,
       userAgent,
       success,
+      accountType,
       lastLogin: new Date(),
     })
 

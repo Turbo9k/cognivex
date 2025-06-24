@@ -19,6 +19,22 @@ export async function POST(request: NextRequest) {
     
     if (!adminUser) {
       console.log('Admin user not found:', username)
+      
+      // Track failed login attempt
+      try {
+        await fetch(`${request.nextUrl.origin}/api/auth/track-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: username,
+            success: false,
+            accountType: 'admin'
+          })
+        })
+      } catch (trackError) {
+        console.error('Failed to track login:', trackError)
+      }
+      
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
@@ -28,6 +44,22 @@ export async function POST(request: NextRequest) {
     // Check if account is active
     if (adminUser.status !== 'active') {
       console.log('Admin account not active:', adminUser.status)
+      
+      // Track failed login attempt
+      try {
+        await fetch(`${request.nextUrl.origin}/api/auth/track-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: adminUser.email || username,
+            success: false,
+            accountType: 'admin'
+          })
+        })
+      } catch (trackError) {
+        console.error('Failed to track login:', trackError)
+      }
+      
       return NextResponse.json(
         { error: 'Account is inactive or suspended' },
         { status: 401 }
@@ -39,6 +71,22 @@ export async function POST(request: NextRequest) {
     
     if (!isPasswordValid) {
       console.log('Invalid password for admin user:', username)
+      
+      // Track failed login attempt
+      try {
+        await fetch(`${request.nextUrl.origin}/api/auth/track-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: adminUser.email || username,
+            success: false,
+            accountType: 'admin'
+          })
+        })
+      } catch (trackError) {
+        console.error('Failed to track login:', trackError)
+      }
+      
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
@@ -47,6 +95,21 @@ export async function POST(request: NextRequest) {
 
     // Update login info
     await adminUser.updateLoginInfo()
+
+    // Track successful login
+    try {
+      await fetch(`${request.nextUrl.origin}/api/auth/track-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: adminUser.email || username,
+          success: true,
+          accountType: 'admin'
+        })
+      })
+    } catch (trackError) {
+      console.error('Failed to track login:', trackError)
+    }
 
     // Create JWT token for admin
     const tokenPayload = { 

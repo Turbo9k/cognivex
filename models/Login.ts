@@ -21,6 +21,11 @@ const loginSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  accountType: {
+    type: String,
+    enum: ['admin', 'worker', 'user'],
+    default: 'user',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

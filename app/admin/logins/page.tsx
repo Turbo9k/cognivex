@@ -24,6 +24,7 @@ interface LoginRecord {
   method: 'password' | 'oauth' | 'token'
   deviceType: 'desktop' | 'mobile' | 'tablet'
   browser?: string
+  accountType?: 'admin' | 'worker' | 'user'
 }
 
 export default function LoginHistoryPage() {
@@ -32,6 +33,7 @@ export default function LoginHistoryPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [accountTypeFilter, setAccountTypeFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 15
 
@@ -40,44 +42,14 @@ export default function LoginHistoryPage() {
       try {
         setLoading(true)
         
-        // Create 3 mock login entries as requested
-        const mockLogins: LoginRecord[] = [
-          {
-            _id: 'login_1',
-            email: 'admin@cognivex.com',
-            loginTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-            ipAddress: '192.168.1.100',
-            userAgent: 'Chrome/120.0.0.0',
-            location: 'San Francisco, US',
-            status: 'success',
-            method: 'password',
-            deviceType: 'desktop'
-          },
-          {
-            _id: 'login_2',
-            email: 'user@example.com',
-            loginTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
-            ipAddress: '10.0.0.50',
-            userAgent: 'Firefox/119.0.0.0',
-            location: 'New York, US',
-            status: 'failed',
-            method: 'password',
-            deviceType: 'desktop'
-          },
-          {
-            _id: 'login_3',
-            email: 'suspicious@test.com',
-            loginTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-            ipAddress: '203.0.113.10',
-            userAgent: 'Unknown',
-            location: 'Unknown',
-            status: 'blocked',
-            method: 'password',
-            deviceType: 'mobile'
-          }
-        ]
-        
-        setLogins(mockLogins)
+        const response = await fetch('/api/admin/logins')
+        if (response.ok) {
+          const data = await response.json()
+          setLogins(data.logins || [])
+        } else {
+          console.error('Failed to fetch logins')
+          setLogins([])
+        }
       } catch (error) {
         console.error('Error fetching login history:', error)
         setLogins([])
@@ -93,7 +65,8 @@ export default function LoginHistoryPage() {
     const matchesSearch = login.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          login.location?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || login.status === statusFilter
-    return matchesSearch && matchesStatus
+    const matchesAccountType = accountTypeFilter === 'all' || login.accountType === accountTypeFilter
+    return matchesSearch && matchesStatus && matchesAccountType
   })
 
   const totalPages = Math.ceil(filteredLogins.length / itemsPerPage)
@@ -118,20 +91,33 @@ export default function LoginHistoryPage() {
     }
   }
 
+  const getAccountTypeColor = (accountType: string) => {
+    switch (accountType) {
+      case 'admin': return 'bg-purple-100 text-purple-800'
+      case 'worker': return 'bg-blue-100 text-blue-800'
+      case 'user': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
   const statusCounts = {
     total: logins.length,
     success: logins.filter(l => l.status === 'success').length,
     failed: logins.filter(l => l.status === 'failed').length,
-    blocked: logins.filter(l => l.status === 'blocked').length
+    blocked: logins.filter(l => l.status === 'blocked').length,
+    admin: logins.filter(l => l.accountType === 'admin').length,
+    worker: logins.filter(l => l.accountType === 'worker').length,
+    user: logins.filter(l => l.accountType === 'user').length
   }
 
   const exportLogins = () => {
     const csvContent = [
-      ['Email', 'Login Time', 'Status', 'Location', 'Browser', 'Method'],
+      ['Email', 'Login Time', 'Status', 'Account Type', 'Location', 'Browser', 'Method'],
       ...filteredLogins.map(login => [
         login.email, 
         login.loginTime, 
         login.status, 
+        login.accountType || 'user',
         login.location, 
         login.browser || 'Unknown', 
         login.method || 'password'
@@ -238,15 +224,15 @@ export default function LoginHistoryPage() {
 
             <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow`}>
               <div className="flex items-center">
-                <div className="bg-yellow-500 p-3 rounded-md">
-                  <ExclamationTriangleIcon className="h-6 w-6 text-white" />
+                <div className="bg-purple-500 p-3 rounded-md">
+                  <ShieldCheckIcon className="h-6 w-6 text-white" />
                 </div>
                 <div className="ml-4">
                   <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                    Blocked
+                    Admin Logins
                   </p>
                   <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    {statusCounts.blocked.toLocaleString()}
+                    {statusCounts.admin.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -285,6 +271,20 @@ export default function LoginHistoryPage() {
                   <option value="failed">Failed</option>
                   <option value="blocked">Blocked</option>
                 </select>
+                <select
+                  value={accountTypeFilter}
+                  onChange={(e) => setAccountTypeFilter(e.target.value)}
+                  className={`px-4 py-2 border rounded-md ${
+                    theme === 'dark'
+                      ? 'border-gray-600 bg-gray-700 text-white'
+                      : 'border-gray-300 bg-white text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                >
+                  <option value="all">All Account Types</option>
+                  <option value="admin">Admin</option>
+                  <option value="worker">Worker</option>
+                  <option value="user">User</option>
+                </select>
                 <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                   {filteredLogins.length.toLocaleString()} records found
                 </div>
@@ -302,6 +302,9 @@ export default function LoginHistoryPage() {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Account Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Login Time
@@ -336,6 +339,11 @@ export default function LoginHistoryPage() {
                           {login.status}
                         </span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAccountTypeColor(login.accountType || 'user')}`}>
+                        {login.accountType || 'user'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {new Date(login.loginTime).toLocaleString()}

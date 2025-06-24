@@ -7,63 +7,53 @@ export async function GET() {
   try {
     await connectDB()
     
-    // Get all login attempts from database
-    const logins = await Login.find({}).sort({ createdAt: -1 })
-    
-    return NextResponse.json({ 
-      success: true, 
-      logins: logins.map(login => ({
-        id: login._id.toString(),
-        email: login.email,
-        success: login.success,
-        ipAddress: login.ipAddress,
-        userAgent: login.userAgent,
-        lastLogin: login.lastLogin.toISOString(),
-        createdAt: login.createdAt.toISOString(),
-        // Extract browser and location info from user agent and IP
-        browser: extractBrowser(login.userAgent),
-        location: generateLocation(login.ipAddress),
-        status: login.success ? 'success' : (Math.random() > 0.5 ? 'failed' : 'blocked')
-      }))
-    })
+    // Get all logins, sorted by most recent first
+    const logins = await Login.find({})
+      .sort({ lastLogin: -1 })
+      .limit(1000) // Limit to prevent performance issues
+
+    // Transform the data to match the frontend interface
+    const transformedLogins = logins.map(login => ({
+      _id: login._id.toString(),
+      email: login.email,
+      loginTime: login.lastLogin.toISOString(),
+      ipAddress: login.ipAddress,
+      userAgent: login.userAgent,
+      location: 'Unknown', // We could add geolocation later
+      status: login.success ? 'success' : 'failed',
+      method: 'password',
+      deviceType: getDeviceType(login.userAgent),
+      browser: getBrowser(login.userAgent),
+      accountType: login.accountType || 'user'
+    }))
+
+    return NextResponse.json({ logins: transformedLogins })
   } catch (error) {
-    console.error('Error fetching login records:', error)
+    console.error('Error fetching logins:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch login records', logins: [] },
+      { error: 'Failed to fetch logins' },
       { status: 500 }
     )
   }
 }
 
-// Helper function to extract browser from user agent
-function extractBrowser(userAgent: string): string {
-  if (!userAgent) return 'Unknown'
-  
-  if (userAgent.includes('Chrome')) return 'Chrome'
-  if (userAgent.includes('Firefox')) return 'Firefox'
-  if (userAgent.includes('Safari')) return 'Safari'
-  if (userAgent.includes('Edge')) return 'Edge'
-  return 'Other'
+function getDeviceType(userAgent: string): 'desktop' | 'mobile' | 'tablet' {
+  const ua = userAgent.toLowerCase()
+  if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+    return 'mobile'
+  }
+  if (ua.includes('tablet') || ua.includes('ipad')) {
+    return 'tablet'
+  }
+  return 'desktop'
 }
 
-// Helper function to generate location from IP (mock)
-function generateLocation(ipAddress: string): string {
-  if (!ipAddress) return 'Unknown'
-  
-  const locations = [
-    'New York, US',
-    'London, UK', 
-    'Tokyo, JP',
-    'Berlin, DE',
-    'Sydney, AU',
-    'Toronto, CA',
-    'Paris, FR',
-    'Mumbai, IN',
-    'Singapore, SG',
-    'São Paulo, BR'
-  ]
-  
-  // Use IP to deterministically pick a location
-  const hash = ipAddress.split('.').reduce((acc, part) => acc + parseInt(part), 0)
-  return locations[hash % locations.length]
+function getBrowser(userAgent: string): string {
+  const ua = userAgent.toLowerCase()
+  if (ua.includes('chrome')) return 'Chrome'
+  if (ua.includes('firefox')) return 'Firefox'
+  if (ua.includes('safari')) return 'Safari'
+  if (ua.includes('edge')) return 'Edge'
+  if (ua.includes('opera')) return 'Opera'
+  return 'Unknown'
 } 
