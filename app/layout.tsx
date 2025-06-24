@@ -3,12 +3,16 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Navigation from '@/components/layout/Navigation'
 import { ThemeProvider } from '@/components/theme-provider'
+import Header from '@/components/layout/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Cognivex - Intelligent Workspace Management',
-  description: 'Cognivex is the connected workspace where better, faster work happens. Streamlined admin and worker management with intelligent automation.',
+  title: 'Cognivex - Connected Workspace',
+  description: 'Write, plan, share. With AI at your side.',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
@@ -18,13 +22,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={`${inter.className} h-full bg-white dark:bg-gray-900 transition-colors duration-200`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          storageKey="cognivex-theme"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
+          <Header />
           <Navigation />
           <main>{children}</main>
         </ThemeProvider>

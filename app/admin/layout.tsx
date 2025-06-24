@@ -13,13 +13,13 @@ export default function AdminLayout({
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <Link href="/admin" className="text-xl font-bold text-gray-900 dark:text-white">
+                <Link href="/admin/dashboard" className="text-xl font-bold text-gray-900 dark:text-white">
                   Admin Dashboard
                 </Link>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link
-                  href="/admin"
+                  href="/admin/dashboard"
                   className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Dashboard
@@ -31,7 +31,7 @@ export default function AdminLayout({
                   Subscribers
                 </Link>
                 <Link
-                  href="/admin/credentials"
+                  href="/admin/logins"
                   className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Login Logs

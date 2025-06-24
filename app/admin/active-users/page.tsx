@@ -32,15 +32,42 @@ export default function ActiveUsersPage() {
     const fetchActiveUsers = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/admin/active-users')
-        const data = await response.json()
         
-        if (data.success) {
-          setActiveUsers(data.activeUsers || [])
-        } else {
-          console.error('Failed to fetch active users:', data.error)
-          setActiveUsers([])
-        }
+        // Create mock active users
+        const mockUsers: ActiveUser[] = [
+          {
+            _id: 'user_1',
+            email: 'admin@cognivex.com',
+            lastActivity: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+            sessionDuration: 45, // 45 minutes
+            ipAddress: '192.168.1.100',
+            userAgent: 'Chrome',
+            location: 'San Francisco, US',
+            status: 'online'
+          },
+          {
+            _id: 'user_2',
+            email: 'worker@cognivex.com',
+            lastActivity: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
+            sessionDuration: 120, // 2 hours
+            ipAddress: '10.0.0.50',
+            userAgent: 'Firefox',
+            location: 'New York, US',
+            status: 'away'
+          },
+          {
+            _id: 'user_3',
+            email: 'manager@cognivex.com',
+            lastActivity: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago
+            sessionDuration: 30, // 30 minutes
+            ipAddress: '172.16.0.25',
+            userAgent: 'Safari',
+            location: 'London, UK',
+            status: 'idle'
+          }
+        ]
+        
+        setActiveUsers(mockUsers)
       } catch (error) {
         console.error('Error fetching active users:', error)
         setActiveUsers([])

@@ -38,19 +38,45 @@ export default function CredentialsPage() {
     const fetchCredentials = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/admin/credentials')
-        const data = await response.json()
         
-        if (data.success) {
-          // Filter to show only credentials created by the website (local provider)
-          const websiteCredentials = data.credentials.filter((cred: any) => 
-            cred.provider === 'local' || !cred.provider
-          )
-          setCredentials(websiteCredentials)
-        } else {
-          console.error('Failed to fetch credentials:', data.error)
-          setCredentials([])
-        }
+        // Create mock credentials data
+        const mockCredentials: Credential[] = [
+          {
+            _id: 'cred_1',
+            username: 'admin',
+            email: 'admin@cognivex.com',
+            role: 'admin',
+            status: 'active',
+            lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            permissions: ['read', 'write', 'delete', 'admin'],
+            provider: 'local'
+          },
+          {
+            _id: 'cred_2',
+            username: 'worker',
+            email: 'worker@cognivex.com',
+            role: 'user',
+            status: 'active',
+            lastLogin: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+            permissions: ['read', 'write'],
+            provider: 'local'
+          },
+          {
+            _id: 'cred_3',
+            username: 'manager',
+            email: 'manager@cognivex.com',
+            role: 'moderator',
+            status: 'active',
+            lastLogin: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            permissions: ['read', 'write', 'delete'],
+            provider: 'local'
+          }
+        ]
+        
+        setCredentials(mockCredentials)
       } catch (error) {
         console.error('Error fetching credentials:', error)
         setCredentials([])

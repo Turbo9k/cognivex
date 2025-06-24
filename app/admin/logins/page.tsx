@@ -39,16 +39,45 @@ export default function LoginHistoryPage() {
     const fetchLogins = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/admin/logins')
-        const data = await response.json()
         
-        if (data.success) {
-          setLogins(data.logins)
-        } else {
-          console.error('Failed to fetch logins:', data.error)
-          // Fallback to empty array if API fails
-          setLogins([])
-        }
+        // Create 3 mock login entries as requested
+        const mockLogins: LoginRecord[] = [
+          {
+            _id: 'login_1',
+            email: 'admin@cognivex.com',
+            loginTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+            ipAddress: '192.168.1.100',
+            userAgent: 'Chrome/120.0.0.0',
+            location: 'San Francisco, US',
+            status: 'success',
+            method: 'password',
+            deviceType: 'desktop'
+          },
+          {
+            _id: 'login_2',
+            email: 'user@example.com',
+            loginTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
+            ipAddress: '10.0.0.50',
+            userAgent: 'Firefox/119.0.0.0',
+            location: 'New York, US',
+            status: 'failed',
+            method: 'password',
+            deviceType: 'desktop'
+          },
+          {
+            _id: 'login_3',
+            email: 'suspicious@test.com',
+            loginTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+            ipAddress: '203.0.113.10',
+            userAgent: 'Unknown',
+            location: 'Unknown',
+            status: 'blocked',
+            method: 'password',
+            deviceType: 'mobile'
+          }
+        ]
+        
+        setLogins(mockLogins)
       } catch (error) {
         console.error('Error fetching login history:', error)
         setLogins([])
