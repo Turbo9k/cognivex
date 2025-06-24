@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import Login from '@/models/Login'
+import { getLocationFromIP } from '@/lib/utils'
 
 // GET /api/admin/logins - Get all login attempts
 export async function GET() {
@@ -19,7 +20,7 @@ export async function GET() {
       loginTime: login.lastLogin.toISOString(),
       ipAddress: login.ipAddress,
       userAgent: login.userAgent,
-      location: 'Unknown', // We could add geolocation later
+      location: getLocationFromIP(login.ipAddress),
       status: login.success ? 'success' : 'failed',
       method: 'password',
       deviceType: getDeviceType(login.userAgent),
