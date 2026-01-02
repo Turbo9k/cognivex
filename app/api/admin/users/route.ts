@@ -78,7 +78,9 @@ export async function GET() {
     console.error('Error fetching users:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch users'
+      error: 'Failed to fetch users',
+      adminUsers: [],
+      workerUsers: []
     }, { status: 500 })
   }
 }

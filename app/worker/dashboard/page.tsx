@@ -168,9 +168,10 @@ export default function WorkerDashboard() {
   }
 
   const { stats, quotes } = data
-  const pendingQuotes = quotes.filter(q => q.status === 'pending')
-  const approvedQuotes = quotes.filter(q => q.status === 'approved')
-  const rejectedQuotes = quotes.filter(q => q.status === 'rejected')
+  const quotesArray = quotes || []
+  const pendingQuotes = quotesArray.filter(q => q.status === 'pending')
+  const approvedQuotes = quotesArray.filter(q => q.status === 'approved')
+  const rejectedQuotes = quotesArray.filter(q => q.status === 'rejected')
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">

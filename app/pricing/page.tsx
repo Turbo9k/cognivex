@@ -105,7 +105,7 @@ export default function PricingPage() {
                         What's included
                       </h4>
                       <ul className="mt-6 space-y-4">
-                        {plan.features.map((feature) => (
+                        {(plan.features || []).map((feature) => (
                           <li key={feature} className="flex items-start">
                             <div className="flex-shrink-0">
                               <CheckCircle className="h-5 w-5 text-primary" aria-hidden="true" />
