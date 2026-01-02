@@ -255,7 +255,7 @@ export default function WorkerDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-medium text-gray-900 dark:text-white">
-                              {quote.clientName || quote.clientEmail}
+                              {quote.clientName || quote.clientEmail || 'Unknown Client'}
                             </h3>
                             {quote.company && (
                               <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -264,12 +264,12 @@ export default function WorkerDashboard() {
                             )}
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            {quote.projectType} • Budget: {quote.budget} • Timeline: {quote.timeline}
+                            {quote.projectType || 'General Inquiry'} • Budget: {quote.budget || 'Not specified'} • Timeline: {quote.timeline || 'Not specified'}
                           </p>
                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                            {quote.description.length > 150 
-                              ? `${quote.description.substring(0, 150)}...` 
-                              : quote.description
+                            {(quote.description || '').length > 150 
+                              ? `${(quote.description || '').substring(0, 150)}...` 
+                              : (quote.description || 'No description provided')
                             }
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">

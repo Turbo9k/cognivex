@@ -13,10 +13,25 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean()
     
+    // Transform quotes to match frontend expectations
+    const transformedQuotes = quotes.map((quote: any) => ({
+      _id: quote._id.toString(),
+      clientName: quote.name,
+      clientEmail: quote.email,
+      company: quote.company,
+      projectType: 'General Inquiry', // Default since not in schema
+      budget: 'Not specified', // Default since not in schema
+      timeline: 'Not specified', // Default since not in schema
+      description: quote.message || '',
+      status: quote.status || 'pending',
+      createdAt: quote.createdAt ? new Date(quote.createdAt).toISOString() : new Date().toISOString(),
+      updatedAt: quote.updatedAt ? new Date(quote.updatedAt).toISOString() : quote.createdAt ? new Date(quote.createdAt).toISOString() : new Date().toISOString()
+    }))
+    
     return NextResponse.json({
       success: true,
-      quotes,
-      count: quotes.length,
+      quotes: transformedQuotes,
+      count: transformedQuotes.length,
       message: 'Quotes retrieved successfully'
     })
     
