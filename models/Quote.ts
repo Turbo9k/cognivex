@@ -22,6 +22,11 @@ const quoteSchema = new mongoose.Schema({
     enum: ['pending', 'in-progress', 'completed', 'cancelled', 'approved', 'rejected'],
     default: 'pending',
   },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'medium',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

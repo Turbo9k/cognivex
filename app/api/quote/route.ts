@@ -123,6 +123,7 @@ export async function GET() {
           company: quote.company,
           message: quote.message,
           status: quote.status,
+          priority: quote.priority || 'medium',
           createdAt: quote.createdAt.toISOString()
         }))
       })

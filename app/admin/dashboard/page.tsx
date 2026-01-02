@@ -9,7 +9,8 @@ import {
   ClipboardDocumentListIcon,
   UserIcon,
   ChartBarIcon,
-  Cog6ToothIcon 
+  Cog6ToothIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 interface RealStats {
@@ -17,6 +18,18 @@ interface RealStats {
   activeUsers: number;
   totalLogins: number;
   totalCredentials: number;
+  totalQuotes: number;
+}
+
+interface Quote {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  message: string;
+  status: string;
+  priority?: string;
+  createdAt: string;
 }
 
 export default function AdminDashboard() {
@@ -26,8 +39,12 @@ export default function AdminDashboard() {
     totalSubscribers: 0,
     activeUsers: 0,
     totalLogins: 0,
-    totalCredentials: 0
+    totalCredentials: 0,
+    totalQuotes: 0
   });
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [quotesLoading, setQuotesLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'quotes'>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,24 +58,32 @@ export default function AdminDashboard() {
         setLoading(true);
         
         // Fetch real data from multiple endpoints
-        const [subscribersRes, usersRes, loginsRes, credentialsRes] = await Promise.all([
+        const [subscribersRes, usersRes, loginsRes, credentialsRes, quotesRes] = await Promise.all([
           fetch('/api/admin/subscribers'),
           fetch('/api/admin/check-users'),
           fetch('/api/admin/logins'),
-          fetch('/api/admin/credentials')
+          fetch('/api/admin/credentials'),
+          fetch('/api/quote')
         ]);
 
         const subscribersData = await subscribersRes.json();
         const usersData = await usersRes.json();
         const loginsData = await loginsRes.json();
         const credentialsData = await credentialsRes.json();
+        const quotesData = await quotesRes.json();
 
         setStats({
           totalSubscribers: subscribersData.subscribers?.length || 0,
           activeUsers: usersData.adminUsers?.filter((u: any) => u.status === 'active').length || 0,
           totalLogins: loginsData.logins?.length || 0,
-          totalCredentials: credentialsData.credentials?.length || 0
+          totalCredentials: credentialsData.credentials?.length || 0,
+          totalQuotes: quotesData.quotes?.length || 0
         });
+
+        // Set quotes data
+        if (quotesData.success && quotesData.quotes) {
+          setQuotes(quotesData.quotes);
+        }
         
         setError(null);
       } catch (error) {
@@ -69,7 +94,8 @@ export default function AdminDashboard() {
           totalSubscribers: 0,
           activeUsers: 0,
           totalLogins: 0,
-          totalCredentials: 0
+          totalCredentials: 0,
+          totalQuotes: 0
         });
       } finally {
         setLoading(false);
@@ -170,7 +196,15 @@ Report generated on ${new Date().toLocaleString()}
     }
   };
 
-  const adminSections = [
+  const adminSections: Array<{
+    title: string;
+    description: string;
+    href: string;
+    icon: any;
+    count: number;
+    color: string;
+    onClick?: () => void;
+  }> = [
     {
       title: 'Subscribers',
       description: 'Manage newsletter subscribers',
@@ -202,6 +236,15 @@ Report generated on ${new Date().toLocaleString()}
       icon: KeyIcon,
       count: stats.totalCredentials,
       color: 'bg-orange-500'
+    },
+    {
+      title: 'Quotes',
+      description: 'Manage quote requests',
+      href: '#',
+      icon: DocumentTextIcon,
+      count: stats.totalQuotes,
+      color: 'bg-indigo-500',
+      onClick: () => setActiveTab('quotes')
     }
   ];
 
@@ -278,15 +321,9 @@ Report generated on ${new Date().toLocaleString()}
       {/* Stats Grid */}
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {adminSections.map((section) => (
-              <Link
-                key={section.title}
-                href={section.href}
-                className={`${
-                  theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
-                } overflow-hidden shadow rounded-lg transition-colors duration-200`}
-              >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            {adminSections.map((section) => {
+              const content = (
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
@@ -319,10 +356,196 @@ Report generated on ${new Date().toLocaleString()}
                     </div>
                   </div>
                 </div>
-              </Link>
+              );
+
+              return section.onClick ? (
+                <button
+                  key={section.title}
+                  onClick={section.onClick}
+                  className={`${
+                    theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
+                  } overflow-hidden shadow rounded-lg transition-colors duration-200 w-full text-left`}
+                >
+                  {content}
+                </button>
+              ) : (
+                <Link
+                  key={section.title}
+                  href={section.href}
+                  className={`${
+                    theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
+                  } overflow-hidden shadow rounded-lg transition-colors duration-200`}
+                >
+                  {content}
+                </Link>
+              );
+            })}
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className={`${section.color} p-3 rounded-md`}>
+                        <section.icon className="h-6 w-6 text-white" aria-hidden="true" />
+                      </div>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} truncate`}>
+                          {section.title}
+                        </dt>
+                        <dd>
+                          <div className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            {section.count.toLocaleString()}
+                          </div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {section.description}
+                    </div>
+                    <div className="mt-1">
+                      <span className="text-blue-600 text-sm font-medium">
+                        {section.count > 0 ? `${section.count}` : '0'} 
+                        <span className="text-xs ml-1">View all →</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              {section.onClick ? </button> : </Link>}
             ))}
           </div>
 
+          {/* Tabs */}
+          <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`${
+                  activeTab === 'overview'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('quotes')}
+                className={`${
+                  activeTab === 'quotes'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Quotes ({stats.totalQuotes})
+              </button>
+            </nav>
+          </div>
+
+          {/* Quotes Tab Content */}
+          {activeTab === 'quotes' && (
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow rounded-lg overflow-hidden`}>
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Quote Requests</h2>
+              </div>
+              <div className="overflow-x-auto">
+                {quotesLoading ? (
+                  <div className="p-6 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-2 text-gray-500 dark:text-gray-400">Loading quotes...</p>
+                  </div>
+                ) : quotes.length === 0 ? (
+                  <div className="p-6 text-center">
+                    <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">No quotes found</p>
+                  </div>
+                ) : (
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Client
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Company
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Message
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Priority
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Date
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} divide-y divide-gray-200 dark:divide-gray-700`}>
+                      {quotes.map((quote) => {
+                        const getPriorityColor = (priority?: string) => {
+                          switch (priority) {
+                            case 'urgent': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                            case 'high': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+                            case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                            case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                            default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+                          }
+                        };
+
+                        const getStatusColor = (status: string) => {
+                          switch (status) {
+                            case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                            case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                            case 'in-progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                            case 'completed': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+                            case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                            default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+                          }
+                        };
+
+                        return (
+                          <tr key={quote.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">{quote.name}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{quote.email}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900 dark:text-white">{quote.company}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
+                                {quote.message}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(quote.priority)}`}>
+                                {(quote.priority || 'medium').toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(quote.status)}`}>
+                                {quote.status.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(quote.createdAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Overview Tab Content */}
+          {activeTab === 'overview' && (
+            <>
           {/* Action Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
@@ -360,6 +583,8 @@ Report generated on ${new Date().toLocaleString()}
               User Management Dashboard
             </Link>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>
