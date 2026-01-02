@@ -367,14 +367,14 @@ export default function CredentialsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-1">
-                        {cred.permissions.slice(0, 3).map((perm, idx) => (
+                        {(cred.permissions || []).slice(0, 3).map((perm, idx) => (
                           <span key={idx} className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
                             {perm}
                           </span>
                         ))}
-                        {cred.permissions.length > 3 && (
+                        {(cred.permissions || []).length > 3 && (
                           <span className="inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">
-                            +{cred.permissions.length - 3}
+                            +{(cred.permissions || []).length - 3}
                           </span>
                         )}
                       </div>

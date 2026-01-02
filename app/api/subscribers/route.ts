@@ -19,10 +19,8 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching subscribers:', error)
     
-    return NextResponse.json(
-      { error: 'Failed to fetch subscribers' },
-      { status: 500 }
-    )
+    // Return empty array instead of error object to prevent frontend crashes
+    return NextResponse.json([], { status: 200 })
   }
 }
 
