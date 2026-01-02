@@ -11,10 +11,10 @@ export async function connectDB() {
     return
   }
 
-  // If no MongoDB URI is provided, throw error
+  // If no MongoDB URI is provided, throw error with helpful message
   if (!MONGODB_URI) {
     console.error('MONGODB_URI environment variable is not set')
-    throw new Error('Database configuration error')
+    throw new Error('Database configuration error: MONGODB_URI environment variable is not set. Please create a .env file with your MongoDB connection string.')
   }
 
   try {
@@ -26,13 +26,16 @@ export async function connectDB() {
     console.log('🔄 Attempting MongoDB connection...')
     // Don't log connection string for security
 
-    // Connect to MongoDB with optimized options
+    // Connect to MongoDB with optimized options for Vercel serverless
     await mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      minPoolSize: 1,
+      serverSelectionTimeoutMS: 10000, // Increased for Vercel
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000,
+      retryWrites: true,
+      w: 'majority',
     })
     
     isConnected = true

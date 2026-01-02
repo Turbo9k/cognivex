@@ -20,15 +20,21 @@ export default function PricingPage() {
         body: JSON.stringify(data),
       })
 
+      const responseData = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to submit quote')
+        // Use error message from API if available
+        const errorMessage = responseData.error || 'Failed to submit quote'
+        throw new Error(errorMessage)
       }
 
-      // Show success message or redirect
+      // Show success message
       alert('Thank you for your interest! We will contact you soon.')
+      setIsModalOpen(false)
     } catch (error) {
       console.error('Error submitting quote:', error)
-      alert('Failed to submit quote. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit quote. Please try again.'
+      alert(errorMessage)
     }
   }
 

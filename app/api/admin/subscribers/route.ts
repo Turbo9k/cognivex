@@ -23,6 +23,16 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error fetching subscribers:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    if (errorMessage.includes('MONGODB_URI') || errorMessage.includes('Database configuration error')) {
+      console.error('MongoDB not configured. Please set MONGODB_URI in your .env file.')
+      return NextResponse.json(
+        { success: false, error: 'Database not configured', subscribers: [] },
+        { status: 503 }
+      )
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Failed to fetch subscribers', subscribers: [] },
       { status: 500 }

@@ -85,6 +85,13 @@ export async function POST(request: Request) {
           { status: 409 }
         )
       }
+      if (error.message.includes('MONGODB_URI') || error.message.includes('Database configuration error')) {
+        console.error('MongoDB not configured. Please set MONGODB_URI in your .env file.')
+        return NextResponse.json(
+          { error: 'Database not configured. Please contact the administrator.' },
+          { status: 503 }
+        )
+      }
       if (error.message.includes('Database')) {
         return NextResponse.json(
           { error: 'Service temporarily unavailable. Please try again.' },

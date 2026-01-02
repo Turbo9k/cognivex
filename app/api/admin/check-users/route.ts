@@ -28,9 +28,19 @@ export async function GET() {
 
   } catch (error) {
     console.error('Check users error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    if (errorMessage.includes('MONGODB_URI') || errorMessage.includes('Database configuration error')) {
+      console.error('MongoDB not configured. Please set MONGODB_URI in your .env file.')
+      return NextResponse.json({
+        error: 'Database not configured',
+        details: 'Please set MONGODB_URI in your .env file'
+      }, { status: 503 })
+    }
+    
     return NextResponse.json({
       error: 'Failed to check admin users',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: errorMessage
     }, { status: 500 })
   }
 }
