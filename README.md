@@ -1,8 +1,11 @@
+## Screenshots
 
+### Main Dashboard
+![Main Dashboard](./screenshots/Cogmain.PNG)
 
-**🚀 Live Admin & Worker Panels Available:**
-- **Admin Panel**: `/admin/login` - Username: `test`, Password: `testtest`  
-- **Worker Panel**: `/worker/login` - Username: `worker`, Password: `worker123`
+### Role-Based Views
+![Worker View](./screenshots/Cogworker.PNG)
+![Admin View](./screenshots/Cogadmin.PNG)
 
 
 ---
@@ -17,6 +20,10 @@ A secure full-stack admin dashboard with authentication, role-based access contr
 
 ## 🚀 Live Demo
 https://cognivex.vercel.app
+
+**🚀 Live Admin & Worker Panels Available:**
+- **Admin Panel**: `/admin/login` - Username: `test`, Password: `testtest`  
+- **Worker Panel**: `/worker/login` - Username: `worker`, Password: `worker123`
 
 ## 📌 About
 Cognivex is an enterprise-style dashboard built with Next.js App Router and TypeScript. The project focuses on secure routing, scalable API design, and reusable UI components.
